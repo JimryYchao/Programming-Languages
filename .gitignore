@@ -1,0 +1,15 @@
+__others
+
+_REF_
+_TMP_
+
+# C EXE
+*.exe
+
+*.tar
+*.xz
+*.tar.xz
+
+# C test scripts
+[Tt]estSrc/
+clib-test/
