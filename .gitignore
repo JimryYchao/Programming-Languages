@@ -10,6 +10,8 @@ _TMP_
 *.xz
 *.tar.xz
 
+.vscode
+
 # C test scripts
 [Tt]estSrc/
 clib-test/
