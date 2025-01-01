@@ -1,0 +1,11 @@
+Hello logfile
+Hello logfile
+Hello logfile
+2024/05/25 23:09:08 DEBUG test log a debug again
+Hello logfile
+2024/05/25 23:09:35 DEBUG test log a debug again
+Hello logfile
+2024/05/25 23:09:49 DEBUG test log a debug again
+Hello logfile
+2024/05/25 23:10:21 DEBUG test log a debug again
+Hello logfile

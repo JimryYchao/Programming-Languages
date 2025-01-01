@@ -1,0 +1,15 @@
+<a id="TOP"></a>
+
+## Package math
+
+<div id="top" style="z-index:99999999;position:fixed;bottom:35px;right:50px;float:right">
+	<a href="./code/math_test.go" target="_blank"><img id="img-code" src="../_rsc/to-code.drawio.png" ></img></a>
+	<!-- <a href="#TOP" ><img id="img-top" src="../_rsc/to-top.drawio.png" ></img></a>	 -->
+	<a href="https://pkg.go.dev/math"  target="_blank"><img id="img-link" src="../_rsc/to-link.drawio.png" ></img></a>
+	<a href="..\README.md"><img id="img-back" src="../_rsc/back.drawio.png"></img></a>
+</div>
+
+包 `math` 提供基本常量和数学函数。此包不保证跨体系结构的具有相同的位结果。
+
+---
+<a id="exam" ><a>

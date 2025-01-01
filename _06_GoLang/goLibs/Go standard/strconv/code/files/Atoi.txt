@@ -1,0 +1,9 @@
+>>> Test string to integer <<<
+Atoi 0 to 0
+Atoi 123 to 123
+Atoi -456 to -456
+Atoi +789 to 789
+Atoi 0777 to 777
+Atoi 0123 to 123
+Atoi 0110 to 110
+Atoi 777 to 777
