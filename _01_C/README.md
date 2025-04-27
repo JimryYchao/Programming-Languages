@@ -8,30 +8,16 @@ int main(void){
 	return 0;
 }
 ```
+> Contents
+
+- [C23 规范摘要](./_01_C%20规范摘要.md)
+- [C23 STD](./_02_C%2023%20STD.md)
+- [环境与编译](./_03_C%20环境与编译.md)
 
 > *References*
 
 - [CPP reference](https://zh.cppreference.com/)
 - [Runebook.dev](https://runebook.dev/en/docs/c/-index-)
-- [C n3301](https://open-std.org/JTC1/SC22/WG14/www/docs/n3301.pdf)
-
-> *Contents*
-
-- [C 程序构建基块](./Contents/_01_C%20程序构建基块.md)
-- [C23 Standard Libraries](<Contents/_02_C 23 STDLIB.md>)
-
-> *Annex*
-
-- [C 常见术语](Contents/_Annex_01_常见术语.md)
-- [C 环境与编译](<Contents/_Annex_02_C 环境与编译.md>)
-
->---
-### C 常见操作
-
-- [字符串操作](/Contents/C%20常见操作/字符串操作.md)
-- [文件输入与输出](/Contents/C%20常见操作/文件输入与输出.md)
-- [内存模型与内存管理](/Contents/C%20常见操作/内存模型与内存管理.md)
-- [把数据存储到文件中](/Contents/C%20常见操作/把结构内容保存在文件中.md)
-- [随机数算法与掷骰子问题](/Contents/C%20常见操作/随机数算法与掷骰子问题.md)
+- [ISO_IEC_9899_2024](./C23%20SLib/BS_ISO_IEC_9899_2024.pdf)
 
 ---

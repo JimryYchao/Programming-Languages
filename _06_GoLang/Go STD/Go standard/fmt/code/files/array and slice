@@ -1,0 +1,24 @@
+(T:[5]int, V:[1 2 3 4 5])
+    %v        |[1 2 3 4 5]|
+(T:[4]interface {}, V:[1 hello 2.5 <nil>])
+    %v        |[1 hello 2.5 <nil>]|
+(T:[5]gostd.renamedUint8, V:[1 2 3 4 5])
+    %v        |[1 2 3 4 5]|
+(T:*[5]int, V:&[1 2 3 4 5])
+    %v        |&[1 2 3 4 5]|
+(T:*[4]interface {}, V:&[1 hello 2.5 <nil>])
+    %v        |&[1 hello 2.5 <nil>]|
+(T:*[5]gostd.renamedUint8, V:&[1 2 3 4 5])
+    %v        |&[1 2 3 4 5]|
+(T:[]int, V:[1 2 3 4 5])
+    %v        |[1 2 3 4 5]|
+(T:[]interface {}, V:[1 hello 2.5 <nil>])
+    %v        |[1 hello 2.5 <nil>]|
+(T:[]gostd.renamedUint8, V:[1 2 3 4 5])
+    %v        |[1 2 3 4 5]|
+(T:*[]int, V:&[1 2 3 4 5])
+    %v        |&[1 2 3 4 5]|
+(T:*[]interface {}, V:&[1 hello 2.5 <nil>])
+    %v        |&[1 hello 2.5 <nil>]|
+(T:*[]gostd.renamedUint8, V:&[1 2 3 4 5])
+    %v        |&[1 2 3 4 5]|
