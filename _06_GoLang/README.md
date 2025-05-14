@@ -1,4 +1,4 @@
-## Go programming technology summary
+## Go Summary
 
 ```go
 package main
@@ -8,7 +8,7 @@ func main(){
 }
 ```
 
-> Contents
+> **Contents**
 
 - [Go 规范摘要](./01_Go%20规范摘要.md)
 - [Go 模块管理](./02_Go%20模块管理.md)
@@ -17,16 +17,9 @@ func main(){
 - [ ] Go 垃圾回收原理
 - [ ] Go 程序诊断与分析 
 
-> References
+> **References**
 
  - [golang.google.cn/ref/spec](https://golang.google.cn/ref/spec)
  - [Go Standard Library](https://pkg.go.dev/std)
 
-
-// [ ] TODO...
-<!-- ![](https://github-readme-stats.vercel.app/api?username=jimryychao&show_icons=true&theme=radical)
-![](https://github-readme-stats.vercel.app/api/top-langs?username=jimryychao&layout=compact&langs_count=5)
-![](https://github-profile-trophy.vercel.app/?username=jimryychao) -->
-
-
-
+---
