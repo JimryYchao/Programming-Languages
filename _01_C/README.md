@@ -1,7 +1,6 @@
 ### C Summary
 
 ```c
-// helloworld.c
 #include <stdio.h>
 int main(void){
 	printf("Hello C23!");
@@ -10,9 +9,9 @@ int main(void){
 ```
 > **Contents**
 
-- [C 规范摘要](./_01_C%20规范摘要.md)
-- [C STD](./_02_C%20STD.md)
-- [环境与编译](./_03_C%20环境与编译.md)
+- [C 规范摘要](./01_C%20规范摘要.md)
+- [C STD](./02_C%20STD.md)
+- [环境与编译](./03_C%20环境与编译.md)
 
 > **References**
 
