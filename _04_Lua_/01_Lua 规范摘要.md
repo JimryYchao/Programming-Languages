@@ -290,31 +290,6 @@ second line
 "123\z \r678"   --> 123\r678
 ```
 
-> *格式化输出*
-
-`string.format()` 生成格式化字符串。
-
-```lua
--- 格式转换符
-%c     -- 接受整数, ASCII 字符
-%a+    -- 接受数值, p 计数法
-%d,%i  -- 接受整数, 有符号整数
-%o     -- 接受整数, 八进制数
-%u     -- 接受整数, 无符号整数
-%x,%X  -- 接受整数, 十六进制数
-%e,%E  -- 接受数值, 科学记数法
-%f     -- 接受数值, 浮点数格式
-%g,%G  -- 接受数值, %e/%E 或 %f 中较短的一种格式
-%q     -- 接受字符串, 转化为 Lua 格式
-%s     -- 接受字符串,
--- 修饰符
-+      -- 显示数值符号位
-0      -- 宽度前导零在后面指定了字串宽度时占位用. 不填时的默认占位符是空格|
--      -- 左对齐, 默认右对齐
-n      -- 整数, 指定宽度
-.n     -- 小数位数, 或字串裁切
-```
-
 >---
 #### table
 
@@ -1400,6 +1375,231 @@ Lua 用白、灰、黑三色来标记一个对象的可回收状态，其中白�
 该对象存储链表是否达到链尾 —— no
       ↑                     ↓
 将对象置为白 ← no — 逐个判断对象是否为白 — yes → 释放对象所占用的空间
+```
+
+---
+### 附录
+#### 格式化输出
+
+`string.format()` 生成格式化字符串。
+
+```lua
+-- 格式转换符
+%c     -- 接受整数, ASCII 字符
+%a+    -- 接受数值, p 计数法
+%d,%i  -- 接受整数, 有符号整数
+%o     -- 接受整数, 八进制数
+%u     -- 接受整数, 无符号整数
+%x,%X  -- 接受整数, 十六进制数
+%e,%E  -- 接受数值, 科学记数法
+%f     -- 接受数值, 浮点数格式
+%g,%G  -- 接受数值, %e/%E 或 %f 中较短的一种格式
+%q     -- 接受字符串, 转化为 Lua 格式
+%s     -- 接受字符串,
+-- 修饰符
++      -- 显示数值符号位
+0      -- 宽度前导零在后面指定了字串宽度时占位用. 不填时的默认占位符是空格|
+-      -- 左对齐, 默认右对齐
+n      -- 整数, 指定宽度
+.n     -- 小数位数, 或字串裁切
+```
+
+>---
+
+#### 日期与时间
+
+Lua 使用两种方式表示日期和时间：*integer*（从 `Jan 01,1970,0:00 UTC` 开始后的秒数）和 *data* 表（`date = {year,month,day,hour,min,sec,wday,yday,isdst}`）。`os.time()` 以整数形式返回当前日期和时间。
+
+```lua
+print(os.time())	--> 1669608000 (11/28/2022, 12:00 UTC)
+print(os.time({year = 2022,month = 11,day = 28}))
+```
+
+`os.date(format, time?)` 在一定程度上是函数 `os.time` 的反函数，返回一个包含日期及时刻的字符串或表。格式化方法取决于所给字符串 `format`：
+
+```lua
+*t             -- 返回 table 格式
+%a,%A          -- 周几简写(Wed)，全写(Wednesday)
+%b,%B          -- 月份简写(Sep)，全写(September)
+%c             -- 日期和时间，(09/12/22 23:01:01)
+%d             -- 一个月的第几天，(16) , [01,31]
+%H             -- 24小时制的小时数，(23), [00,23]
+%I             -- 12小时制的小时数，(11), [01,12]
+%j             -- 一年中的第几天，(259), [001,365]
+%m             -- 月份
+%M             -- 分钟
+%p             -- "am" 或 "pm"
+%S             -- 秒数
+%w             -- 星期(0)	Sunday-Saturday(0-6)
+%W             -- 一年的第几周 [00,53]
+%x             -- 日期，(09/16/99)
+%X             -- 时间，(23:48:10)
+%y             -- 表示年份的两位数，(22)，[00,99]
+%Y             -- 完整的年份，(2022)
+%z             -- 时区，(-0300)
+%%             -- 百分号
+```
+
+`!%<signal>` 叹号开头，`os.date` 会以 UTC 格式进行解析。
+
+```lua
+local now = os.time()
+print(os.date("%c", now)) 
+print(os.date("!%c", now)) 
+-- Tue Jun 10 02:46:23 2025
+-- Mon Jun  9 18:46:23 2025
+```
+
+>---
+#### 模式匹配
+
+`string.find` 在目标字符串中搜索指定的模式并返回第一个匹配到的开始与结束位置的索引（字节）。`string.match` 则直接返回符合模式匹配的子串。`string.gsub` 将匹配到的子串替换为给定子串。
+
+```lua
+print(string.find("hello world", "hello"))                  --> 1 5
+print(string.match("Today is 1/1/1970", "%d+/%d+/%d+"))     --> 1/1/1970
+print(string.gsub("Lua is cute", "cute", "great"))          --> Lua is great
+```
+
+`string.gmatch` 返回一个迭代器，连续调用时依次返回符合模式的子串。
+
+```lua
+s = "some string"
+words = {}
+for w in string.gmatch(s, "%a+") do
+    words[#words + 1] = w    -- words = {"some", "string"}
+end
+```
+
+> **模式**
+
+```lua
+.          -- 任意字符
+%a         -- 字母
+%c         -- 控制字符
+%d         -- 数字
+%g         -- 除空格外的可打印字符
+%l         -- 小写字母
+%p         -- 标点符号
+%s         -- 空白字符
+%u         -- 大写字母
+%w         -- 字母和数字
+%x         -- 十六进制数字
+-- 以上字符的大写形式表示该字符分类的补集
+%M         -- M 表示对魔法字符的转义，可以是 ().%+-*?[]^$，例如 %% 表示 %
+-- 魔法字符
+[]         -- char-set 字符集	[0123456] 表示 0-6
+-          -- 连接字符集范围 [0-6]
+^          -- 字符集的补集 [^\n] 表示换行符外的字符，%S 等价于 [^%s]
++          -- 重复至少一次，%d+ 表示匹配一个或多个数字
+*          -- 重复最少零次
+-          -- 重复最少零次（最小匹配）
+?          -- 出现零次或一次
+^,$        -- 锚定目标字符串开头(^)或结尾($)，^ 表示从字符串开头开始查找
+%b xy      -- 匹配成对的字符串，x 为起始，y 为结束。例如 %b() 返回包含 () 内中间的字符串
+```
+
+`%f[set]`前向匹配，该模式只有在后一个字符位于 *set* 内而前一个字符不在范围内时匹配一个空字符串。前向匹配把目标字符串中第一个字符前和最后一个字符后的位置当成空字符串。
+
+```lua
+s = "the anthem is the theme"
+print(string.gsub(s, "%f[%w]the%f[%W]", "one"))
+    --> one anthem is one theme
+```
+
+> **捕获**
+
+捕获（capture）机制允许根据一个模式从目标字符中抽出与该模式匹配的内容用于后续用途，可以通过把模式中需要捕获的部分放到 `()` 中来指定捕获。函数 `string.match` 会将所有捕获到的值最为单独的结果返回。
+
+```lua
+pair = "name = Anna"
+key, value = string.match(pair, "(%a+)%s*=%s*(%a+)")
+print(key, value)	--> name  Anna
+```
+
+空白捕捉 `()` 用于锚定捕获模式在目标字符串中的位置。
+
+```lua
+print(string.match("hello", "()ll()"))	-->  3  5 (和 string.find 有所区别)
+```
+
+`% num` 表示匹配第 *num* 个捕获的副本，`%0` 表示整个匹配。
+
+```lua
+s = [[then he said: "it's all right"!]]
+q, quotePart = string.match(s, "([\"'])(.-)%1")
+q           --> "
+quotePart   --> it's all right
+```
+
+读取文本，并记录每个单词出现的次数。
+
+```lua
+function F(file, n)    -- 输出有序列表中的前 n 个元素
+    assert(tonumber(n) > 0)
+    local f = io.input(file)
+    local counter = {}
+    for line in io.lines(file,"l") do
+        for word in string.gmatch(line, "%w+") do
+            counter[word] = (counter[word] or 0) + 1
+        end
+    end
+    io.close(f)
+    local words = {}
+    for w in pairs(counter) do
+        words[#words + 1] = w
+    end
+    table.sort(words, function(w1, w2)  -- 按出现次数降序
+        return counter[w1] > counter[w2] or counter[w1] == counter[w2] and w1 < w2
+    end)
+    for i = 1, n > #words and #words or n do
+        io.output(io.stdout)
+        io.write(words[i], "\t", counter[words[i]], "\n")
+    end
+    io.close(io.stdout)
+end
+
+
+F("filename", 10)
+```
+
+>---
+#### 打包与解包
+
+`string.pack` 和 `string.unpack` 用于在二进制和基本类型值（数值，字符串）之间进行转换。第一个参数为格式化字符串：
+
+```lua
+<           -- 小端编码
+>           -- 大端编码
+=           -- 本地环境的原生大小端编码
+![n]        -- 将最大对齐设为 n，默认为本地
+b           -- 有符号字节 char
+B           -- 无符号字节 unsigned char
+h           -- short
+H           -- unsigned short
+l           -- long
+L           -- unsigned long
+j           -- Lua 有符号 lua_Integer
+J           -- Lua 无符号 lua_Unsigned
+n           -- Lua_Number
+T           -- size_t
+i[n]        -- n 字节的有符号整数，默认为本地
+I[n]        -- n 字节的无符号整数，默认为本地
+f           -- float
+d           -- double
+cn          -- 固定长度 n 的字符串
+z           -- 以 \0 终结的字符串
+s[n]        -- 由表示长度的 n 字节大小整数（默认是 size_t）打头的字符串
+x           -- 1 字节填充 (0)
+Xop         -- 根据转换项 op 对齐的空对象
+空格        -- 忽略格式项，分隔各个选项
+-- [n] 一个可选整数, [1,16]
+```
+
+`string.packsize` 返回 `pack` 结果的长度，该结果不包含 `s` 和 `z` 选项。
+
+```lua
+
 ```
 
 ---
