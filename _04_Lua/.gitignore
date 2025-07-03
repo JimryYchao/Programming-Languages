@@ -1,0 +1,6 @@
+
+lua548/*/x64
+
+!lua548/x64/Release/*.exe
+
+.vs

@@ -1,4 +1,4 @@
-### Lua5.4.8 Standard Libraries
+### Lua Standard Libraries
 
 | module                                 | description          |
 | :------------------------------------- | :------------------- |
