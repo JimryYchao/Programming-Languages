@@ -1,6 +1,5 @@
 
-lua548/*/x64
-
-!lua548/x64/Release/*.exe
-
 .vs
+lua548/win/*/x64
+
+!lua548/win/x64/*.exe
