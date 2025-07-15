@@ -118,29 +118,10 @@ void lua_setallocf (lua_State *L, lua_Alloc f, void *ud);   // 更改 L 的分�
 >---
 ### 附录
 
-#### CAPI Headers
+#### C API Headers
 
-- [lua.h](lua_ref.h) 定义 Lua 虚拟机（Lua State）的 C API 接口、基础数据类型和关键宏。
-
-<!-- <details>
-  <summary>展开查看代码</summary>
-  <pre><code class="language-javascript">
-  // 通过 JavaScript 动态加载文件内容
-  fetch('./lua_ref.h').then(response => response.text()).then(text => {
-    document.querySelector('lua_ref').innerText = text;
-  });
-  </code></pre>
-</details> -->
-
-<pre id="code-container">
-    <code class="language-javascript">加载中...</code>
-</pre>
-<script>
-    fetch('./lua_ref.h')
-        .then(response => response.text())
-        .then(text => {
-            document.querySelector('#code-container code').textContent = text;
-        });
-</script>
+- [lua.h](./Lua%20LIB/lua_ref.h) C API 基础库，定义 Lua 虚拟机（Lua State）的 C API 接口、基础数据类型和关键宏。
+- [lualib.h](./Lua%20LIB/lualib_ref.h) Lua 标准库。
+- [lauxlib.h](./Lua%20LIB/lauxlib_ref.h) C API 辅助库。
 
 ---

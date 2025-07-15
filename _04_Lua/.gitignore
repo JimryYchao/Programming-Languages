@@ -1,5 +1,5 @@
 
 .vs
-lua548/win/*/x64
+*/lua548/win/*/x64
 
-!lua548/win/x64/*.exe
+!*/lua548/win/x64/*.exe
