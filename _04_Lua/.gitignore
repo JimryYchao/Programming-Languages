@@ -1,5 +1,6 @@
 
 .vs
-*/lua548/win/*/x64
+Release
+test
 
-!*/lua548/win/x64/*.exe
+!**/bin/*.exe

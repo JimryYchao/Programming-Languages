@@ -131,7 +131,6 @@ l_noret luaD_throw (lua_State *L, int errcode) {
   }
 }
 
-
 int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
   l_uint32 oldnCcalls = L->nCcalls;
   struct lua_longjmp lj;

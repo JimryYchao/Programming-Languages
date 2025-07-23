@@ -8,7 +8,7 @@ Lua 是一种动态类型语言，通常作为嵌入式语言在宿主语言上�
 - *number* 包括 64 位大小的 *integer* 和 *float*，整数溢出则发生环绕；
 - *string* 是不可变的 UTF-8 字符序列；
 - *function* 表示 Lua 函数和 C 函数；
-- *userdata* 用于将任意 C 数据的原始内存块存储在 Lua 变量中，分为 *full userdata* (由 Lua 管理的占据内存的对象) 和 *light userdata* (C 指针值)；它们没有预定义操作，只能通过 C API 创建或修改；
+- *userdata* 用于将任意 C 数据的原始内存块存储在 Lua 变量中，分为 *full userdata* (由 Lua 管理的占据内存的 C 对象) 和 *light userdata* (C 指针值)；它们没有预定义操作，只能通过 C API 创建或修改；
 - *thread* 表示独立的执行线程，用于实现协程。
 - *table* 实现关联数组，是 Lua 中唯一的数据结构化机制，可用于表示数组、列表、集合、图、记录、字典、树等。与 *nil* 关联的任何键不视为表的一部分。
 
@@ -608,18 +608,18 @@ end
 ---
 ### 表达式
 
-| Category | Operators |
-| :------- | :-------- |
-|幂运算| `x ^ y` |
-|一元| `-x` `#string` `#table` `not x` `~x` |
-乘法|`x * y` `x / y`(浮点除法) `x // y`(向下取整除法) `x % y`|
-加法 | `x + y` `x - y`
-字符串拼接| `x .. y`|
-移位 |`x << y` `x >> y`|
-按位 |`x & y` `x ~ y`(异或) `x \| y`|
-关系 |`x < y` `x > y` `x <= y` `x >= y` `x == y` `x ~= y`| 
-逻辑 | `x and y` `x or y`|
-赋值 | `x = y` |
+| Category   | Operators                                                |
+| :--------- | :------------------------------------------------------- |
+| 幂运算     | `x ^ y`                                                  |
+| 一元       | `-x` `#string` `#table` `not x` `~x`                     |
+| 乘法       | `x * y` `x / y`(浮点除法) `x // y`(向下取整除法) `x % y` |
+| 加法       | `x + y` `x - y`                                          |
+| 字符串拼接 | `x .. y`                                                 |
+| 移位       | `x << y` `x >> y`                                        |
+| 按位       | `x & y` `x ~ y`(异或) `x \| y`                           |
+| 关系       | `x < y` `x > y` `x <= y` `x >= y` `x == y` `x ~= y`      |
+| 逻辑       | `x and y` `x or y`                                       |
+| 赋值       | `x = y`                                                  |
 
 
 `x // y` floor 触发对商向负无穷取整。
@@ -1378,7 +1378,329 @@ Lua 用白、灰、黑三色来标记一个对象的可回收状态，其中白�
 ```
 
 ---
+### 反射
+#### 自省机制
+
+反射是程序用来检查和修改其自身某些部分的能力。Lua 支持的反射机制有：环境允许运行时观察全局变量；
+- 运行时检查和遍历未知数据结构（例如 `type` 和 `pairs`）；
+- 允许程序在自身中追加代码或更新代码（`load` 和 `require`）。
+
+但是 Lua 不能检查局部变量，开发人员不能跟踪代码的执行，函数也不知道调用方，`debug.library` 调试库填补了这些空缺。调试库由两类函数组成：自省函数（introspective function）和钩子（hook）
+  - 自省函数允许检查一个正在运行的活动函数的栈、当前正在执行的代码行、局部变量的名称和值等
+  - 钩子函数允许跟踪一个程序的执行
+
+>---
+#### 自省函数
+> *访问局部变量*
+
+`debug.getlocal(fun|integer, index)` 检查任意活跃函数的局部变量，查询指定栈层次或函数的指定索引局部变量，返回变量名和值或 `nil`。Lua 按局部变量在函数中出现顺序对它们进行编号，编号只限于在函数当前作用域中活跃的变量（索引从 1 开始）。
+
+`debug.setlocal(f|n,index,value)` 用于改变局部变量的值，函数返回被修改值的变量名。
+
+```lua
+local t = {}
+print(debug.getlocal(1,1))
+-- t	table: 000001E7622C4610
+
+function foo(a,b)
+    local i = 1
+    print(debug.getlocal(1,3))   -- i	1
+end
+print(debug.getlocal(foo,2))     -- b
+print(debug.getlocal(foo,3))     -- nil
+```
+
+`debug.getlocal(thread, fun, index)` 返回指定协程的栈层次局部变量信息。调试库中所有的自省函数都能够接受一个可选的协程作为第一个参数
+
+```lua
+function foo(a,b)
+    local i = 1
+    print(debug.getlocal(1,3))   -- i	1
+end
+local co = coroutine.create(foo)
+print(debug.getlocal(co,foo,1))  -- a
+print(debug.getlocal(co,foo,3))  -- nil
+```
+
+值为负的索引获取可变长参数函数的额外参数，-1 指向第一个额外参数，以此类推，但变量的名称始终为 `(vararg)`
+
+```lua
+function foo(a, ...)
+    local i = 1
+    print(debug.getlocal(1, -2))
+end
+
+foo(1, 3, 5)    -- (vararg)		5
+```
+
+> 调用层次信息
+
+`debug.getinfo(function|num [, what?])` 返回与函数或栈层次的有关的一些数据的表。对于注册到 Lua 的 C 函数，只有字段 `what`、`name`、`namewhat`、`nups`、`func` 是有意义的。
+
+<table>
+    <tr>
+        <th>表字段</th>
+        <th>Lua 函数</th>
+        <th>Lua 代码段</th>
+        <th>C 函数</th>
+    </tr>
+    <tr>
+        <td>source</td>
+        <td>函数定义的位置</td>
+        <td>load 返回定义字符串</td>
+        <td>=[c]</td>
+    </tr>
+    <tr>
+        <td>short_src</td>
+        <td>source 的精简版本</td>
+        <td>[string "code"]</td>
+        <td>[c]</td>
+    </tr>
+    <tr>
+        <td>linedefined</td>
+        <td>函数定义的首行位置</td>
+        <td>0</td>
+        <td>-1</td>
+    </tr>
+    <tr>
+        <td>lastlinedefined</td>
+        <td>函数定义的末行位置</td>
+        <td>0</td>
+        <td>-1</td>
+    </tr>
+    <tr>
+        <td>what</td>
+        <td>函数类型 Lua</td>
+        <td>main</td>
+        <td>C</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td colspan =3>返回函数名称的字段</td>
+    </tr>
+    <tr>
+        <td>namewhat</td>
+        <td colspan = 3>字段含义，可能是 global、local、method、field、""（空字符串）</td>
+    </tr>
+    <tr>
+        <td>nups</td>
+        <td colspan = 3>该函数上值的个数</td>
+    </tr>
+    <tr>
+        <td>nparams</td>
+        <td colspan = 3>函数参数的个数</td>
+    </tr>
+        <tr>
+        <td>isvararg</td>
+        <td colspan = 3>参数列表是否包含可变长参数</td>
+    </tr>
+    <tr>
+        <td>activelines</td>
+        <td colspan = 3>该函数所有活跃行的集合</td>
+    </tr>
+    <tr>
+        <td>func</td>
+        <td colspan = 3>该函数本身</td>
+    </tr>
+</table>
+
+使用 `num` 作为参数调用 `getinfo` 返回有关相应栈层次上活跃函数的数据，0 表示 `getinfo` 自己。`num` 大于栈中活跃函数的数量时返回 `nil`。与栈层次相关的两个字段：`currentline` 表示当前该函数正在执行的代码所在的行；`istailcall` 表示函数是否是尾调用。`name` 只有在以一个数字为参数调用 ```getinfo``` 时才会起作用：
+
+```lua
+print(debug.getinfo(0).name)	-- getinfo
+```
+
+> *访问上值*
+
+`debug.getupvalue(f,index)` 用于访问一个被 Lua 函数所使用的上值，Lua 按照函数引用上值的顺序对它们编号；`debug.setupvalue(f,index,value)` 用于更新上值，该函数返回被修改上值的变量名。
+
+```lua
+local up1 = 1
+function foo()
+    local a = up1
+end
+print(debug.getupvalue(foo, 1))     -- up1	1
+print(debug.setupvalue(foo, 1, 2))  -- up1
+print(up1)                          -- 2
+```
+
+>---
+#### 钩子函数
+
+调试库中的钩子机制允许用户注册一个钩子函数，并且在 Lua 程序运行中某个特定事件发生时被调用：
+  - 调用一个函数时产生的 *call* 事件
+  - 函数返回时产生的 *return* 事件
+  - 开始执行一行新代码时产生的 *line* 事件
+  - 执行完指定数量的指令后产生的 *count* 事件
+
+函数 `debug.sethook([thread,] hookf, mask [, count])` 中 `mask` 描述要监视事件的掩码，`count`（可选）描述以何种频度获取 `count` 事件。关闭钩子，只需不带任何参数的调用函数 `sethook`。
+
+```lua
+debug.sethook(print,"l")
+-- Lua 发生 line 事件时会调用它，并输出解释器执行的每一行代码
+```
+
+>---
+#### 调优（profiler）
+
+反射的一个常见用法是用于调优，即程序使用资源的行为分析。对于时间相关的调优最好使用 C 接口。开发一个性能调优工具来列出程序执行的每个函数的调用次数：
+
+```lua
+local Counters = {}
+local Names    = {}
+
+-- 可以在函数活动时获取其名称
+
+local function hook()
+    local f = debug.getinfo(2, "f").func
+    local count = Counters[f]
+    if (count) == nil then
+        Counters[f] = 1
+        Names[f] = debug.getinfo(2, "Sn")
+    else
+        Counters[f] = count + 1
+    end
+end
+
+function getName(f)
+    local n = Names[f]
+    if (n.what == "C") then
+        return n.name
+    end
+    local lc = string.format("[%s]:%d", n.short_src, n.linedefined)
+    if n.what ~= "main" and n.namewhat ~= "" then
+        return string.format("%s (%s)", lc, n.name)
+    else
+        return lc
+    end
+end
+
+function Main()             -- 主函数
+    print("This is Main function...")
+end
+
+debug.sethook(hook, "c")    -- 设置 call 事件的钩子
+Main()                      -- 运行主程序
+debug.sethook()             -- 关闭钩子
+
+for func, count in pairs(Counters) do
+    print(getName(func), count)
+end
+
+--[[
+    This is Main function...
+    print   1
+    [d:\_Lua_\profiler.lua]:30 (Main)       1
+    sethook 1
+]]
+```
+
+>---
+#### 沙盒（sandbox）
+
+> 一个使用钩子的简单沙盒
+
+该程序把钩子设置为监听 count 事件，使得 Lua 每执行 100 条指令就调用一次钩子函数；钩子函数只是一个递增计数器，并检查其是否超过了设定的阙值：
+
+```lua
+local debug = require "debug"
+local steplimit = 1000     -- 最大能执行的 steps
+local count = 0
+
+local function step()
+    count = count + 1
+    if count > steplimit then
+        error("script uses too much CPU")
+    end
+end
+debug.sethook(step, "clr", 100) -- 设置钩子
+```
+
+> 控制内存使用
+
+```lua
+local function checkmem()
+    if collectgarbage("count") > memlimit then
+        error("script uses too much memory")
+    end
+end
+
+local count = 0
+local function step()
+    checkmem()
+    count = count + 1
+    if count > steplimit then
+        error("script uses to much CPU")
+    end
+end
+
+debug.sethook(step, "clr", 100)
+
+--[[
+local s = "123456789012345"
+for i = 1, 36 do
+    s = s .. s
+end
+]]
+```
+
+> 使用钩子阻止对未授权函数的访问
+
+```lua
+local debug = require "debug"
+local steplimit = 1000
+local count = 0
+
+-- 设置授权的函数
+local validfunc = {
+    [print] = true,
+    [string.upper] = true,
+    [string.lower] = true,
+    [string.format] = false,
+    --...    -- 其他授权函数
+}
+
+local function hook(event)
+    print(tostring(event))
+    if event == "call" then
+        local info = debug.getinfo(2, "fn")
+        if not validfunc[info.func] then
+            error("calling bad function: " .. (info.name or "?"))
+        end
+    end
+    count = count + 1
+    if (count > steplimit) then
+        error("script uses too much CPU")
+    end
+end
+
+debug.sethook(hook, "clr", 100)
+print(string.upper("hello"))
+-- HELLO
+print(string.format("%s %d", "foo", 1))
+-- calling bad function: format
+```
+
+---
 ### 附录
+
+#### Lua STD
+
+| STD                                                | Description          | Example |
+| :------------------------------------------------- | :------------------- | :------ |
+| [basic](./Lua%20LIB/api_lua/basic_ref.lua)         | 基础库函数           | [[↗]](./Lua%20LIB/api_lua/example/basic_example.lua)
+| [coroutine](./Lua%20LIB/api_lua/coroutine_ref.lua) | 协程支持             | [[↗]](./Lua%20LIB/api_lua/example/coroutine_example.lua)
+| [debug](./Lua%20LIB/api_lua/debug_ref.lua)         | 调试支持             | [[↗]](./Lua%20LIB/api_lua/example/debug_example.lua)
+| [io](./Lua%20LIB/api_lua/io_ref.lua)               | 输入与输出           | [[↗]](./Lua%20LIB/api_lua/example/io_example.lua)
+| [math](./Lua%20LIB/api_lua/math_ref.lua)           | 数学库               | [[↗]](./Lua%20LIB/api_lua/example/math_example.lua)
+| [os](./Lua%20LIB/api_lua/os_ref.lua)               | 系统支持             | [[↗]](./Lua%20LIB/api_lua/example/os_example.lua)
+| [package](./Lua%20LIB/api_lua/package_ref.lua)     | 模块加载支持         | [[↗]](./Lua%20LIB/api_lua/example/package_example.lua)
+| [string](./Lua%20LIB/api_lua/string_ref.lua)       | 字符串工具与模式匹配 | [[↗]](./Lua%20LIB/api_lua/example/string_example.lua)
+| [table](./Lua%20LIB/api_lua/table_ref.lua)         | *table* 操作支持     | [[↗]](./Lua%20LIB/api_lua/example/table_example.lua)
+| [utf8](./Lua%20LIB/api_lua/utf8_ref.lua)           | UTF-8 编码支持       | [[↗]](./Lua%20LIB/api_lua/example/utf8_example.lua)
+
+>---
+
 #### 格式化输出
 
 `string.format()` 生成格式化字符串。
@@ -1564,7 +1886,7 @@ F("filename", 10)
 ```
 
 >---
-#### 打包与解包
+#### 打包与解包 
 
 `string.pack` 和 `string.unpack` 用于在二进制和基本类型值（数值，字符串）之间进行转换。第一个参数为格式化字符串：
 
@@ -1595,9 +1917,6 @@ Xop         -- 根据转换项 op 对齐的空对象
 空格        -- 忽略格式项，分隔各个选项
 -- [n] 一个可选整数, [1,16]
 ```
-
-`string.packsize` 返回 `pack` 结果的长度，该结果不包含 `s` 和 `z` 选项。
-
 ```lua
 
 ```
