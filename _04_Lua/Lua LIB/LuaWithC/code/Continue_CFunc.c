@@ -1,8 +1,5 @@
-#pragma comment(lib, "LuaDll.lib") 
 #include <math.h>
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+#include "test.h"
 
 static int finishpcall(lua_State* L, int status, intptr_t ctx) {
 	printf("Call finishpcall\n");
@@ -59,7 +56,7 @@ static void _C_DeCounter(lua_State* L, int n) {
 		printf("counter end\n");
 }
 
-int C_DeCounter(lua_State* L) {
+static int C_DeCounter(lua_State* L) {
 	counter = lua_tointeger(L, -1);
 	lua_pop(L, 1);
 	if (counter <= 0)
@@ -81,9 +78,4 @@ void test_Continue_CFunc() {
 		for i = 5, -1, -1 do						\
 			print(coroutine.resume(co))				\
 		end");
-}
-
-int main() {
-	test_Continue_pcall();
-	test_Continue_CFunc();
 }

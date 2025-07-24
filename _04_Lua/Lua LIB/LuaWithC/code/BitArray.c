@@ -1,15 +1,10 @@
-#pragma comment(lib, "LuaDll.lib") 
-
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+#include "test.h"
 
 // 用户定义布尔数组
 #include <limits.h>
 #define BITS_PER_WORD (CHAR_BIT * sizeof(unsigned))
 #define I_WORD(i)     ((unsigned)(i)/BITS_PER_WORD)
 #define I_BIT(i)	  (1 << ((unsigned)(i) % BITS_PER_WORD))
-
 
 typedef struct BitArray {
 	int size;
@@ -94,13 +89,13 @@ int luaopen_BitArray(lua_State* L) {
 	return 1;
 }
 
-int main() {
+void test_BitArray() {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
 	luaopen_BitArray(L);
 	lua_setglobal(L, "BitArray");
 
-	if (luaL_dofile(L, "bitArray.lua"))
+	if (luaL_dofile(L, "BitArray.lua"))
 		printf("%s", lua_tostring(L, -1));
 	lua_close(L);
 }

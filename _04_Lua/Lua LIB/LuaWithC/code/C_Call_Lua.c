@@ -1,14 +1,11 @@
-#pragma comment(lib, "LuaDll.lib") 
-#include "lua.h"
-#include "lauxlib.h"
+#include "test.h"
 
-const char* lua_fname = "luaSrc.lua";
 const char* Op_Add = "Add";
 const char* Op_Mul = "Mul";
 const char* Op_Sub = "Sub";
 const char* Op_Div = "Div";
 
-double lua_Op(lua_State* L, double x, double y, const char* op) {
+static double lua_Op(lua_State* L, double x, double y, const char* op) {
 	lua_getglobal(L, op);
 	lua_pushnumber(L, x);
 	lua_pushnumber(L, y);
@@ -24,7 +21,7 @@ double lua_Op(lua_State* L, double x, double y, const char* op) {
 	return rt;
 }
 
-double lua_Opi(lua_State* L, int x, int y, const char* op) {
+static double lua_Opi(lua_State* L, int x, int y, const char* op) {
 	lua_getglobal(L, op);
 	lua_pushinteger(L, x);
 	lua_pushinteger(L, y);
@@ -40,21 +37,19 @@ double lua_Opi(lua_State* L, int x, int y, const char* op) {
 	return rt;
 }
 
-void lua2C_Op(lua_State* L, double x, double y, const char* op) {
+static void lua2C_Op(lua_State* L, double x, double y, const char* op) {
 	double rt = lua_Op(L, x, y, op);
 	printf("in Lua, %g %s %g = %g\n", x, op, y, rt);
 }
 
-void lua2C_Opi(lua_State* L, int x, int y, const char* op) {
+static void lua2C_Opi(lua_State* L, int x, int y, const char* op) {
 	int rt = lua_Opi(L, x, y, op);
 	printf("in Lua, %i %s %i = %i\n", x, op, y, rt);
 }
 
-void main() {
-	// load lua file
+void test_C_Call_Lua() {
 	lua_State* L = luaL_newstate();
-	if (luaL_loadfile(L, lua_fname) || lua_pcall(L, 0, 0, 0))
-		luaL_error(L, "cannot load lua file: %s\n", lua_tostring(L, -1));
+	luaL_dofile(L, "CCallLua.lua");
 
 	// test call lua function
 	lua2C_Op(L, 3.14, 9.81, Op_Mul);

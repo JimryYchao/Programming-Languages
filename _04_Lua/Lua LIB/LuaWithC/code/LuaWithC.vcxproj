@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b9c25411-99d2-4e24-a17a-ffe73bd931d1}</ProjectGuid>
-    <RootNamespace>Concurrency</RootNamespace>
+    <ProjectGuid>{7fa3d73d-b1c0-40f5-9a91-ce76fd840566}</ProjectGuid>
+    <RootNamespace>LuaWithC</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,7 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\test</OutDir>
+    <OutDir>test</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -119,8 +120,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -130,10 +131,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitArray.c" />
     <ClCompile Include="concurrency.cpp" />
+    <ClCompile Include="Continue_CFunc.c" />
+    <ClCompile Include="C_Call_Lua.c" />
+    <ClCompile Include="Lua_Call_C.c" />
+    <ClCompile Include="memlimit.c" />
+    <ClCompile Include="test_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BitArray.lua" />
+    <None Include="CCallLua.lua" />
     <None Include="lproc.lua" />
+    <None Include="LuaCallC.lua" />
+    <None Include="memlimit.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

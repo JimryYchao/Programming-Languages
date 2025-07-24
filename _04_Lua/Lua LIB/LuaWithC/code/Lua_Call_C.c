@@ -1,7 +1,4 @@
-#pragma comment(lib, "LuaDll.lib") 
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+#include "test.h"
 
 #include <math.h>
 #include <string.h>
@@ -46,7 +43,7 @@ static int l_printTable(lua_State* L) {
 }
 
 
-void test_call_c()
+static void test_call_c()
 {
 	// 创建状态机
 	lua_State* L = luaL_newstate();
@@ -69,14 +66,14 @@ void test_call_c()
 }
 
 // 等效于 test_call_c
-void main() {
+void test_Lua_Call_C() {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
 
 	lua_register(L, "Sin", l_sin);  // 注册 C 函数 Sin
 
 	// do file
-	if (luaL_loadfile(L, "luaCallC.lua") || lua_pcall(L, 0, 0, 0))
+	if (luaL_loadfile(L, "LuaCallC.lua") || lua_pcall(L, 0, 0, 0))
 		luaL_error(L, "cannot load lua file: %s\n", lua_tostring(L, -1));
 
 	// do luastring

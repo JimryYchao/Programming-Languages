@@ -1,6 +1,6 @@
 // #pragma comment(lib, "LuaDll.lib") 
-#include "lua.h"
-#include "lauxlib.h"
+#include "include\lua.h"
+#include "include\lauxlib.h"
 
 static int l_add(lua_State* L) {
 	lua_pushnumber(L, luaL_checknumber(L, 1) + luaL_checknumber(L, 2));

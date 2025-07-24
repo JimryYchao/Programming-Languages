@@ -8,6 +8,6 @@
 ##### build C module 
 
 ```powershell
-$ gcc -shared -o 'CMath.dll' 'csrc\CMath.c' -I"include" -L"." -lLuaDll
+$ gcc -shared -o 'CMath.dll' 'CMath.c' -I"include" -L"." -lLuaDll
 $ lua test_CMath.lua
 ```

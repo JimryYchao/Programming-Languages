@@ -15,13 +15,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BitArray.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="C_Call_Lua.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="concurrency.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Continue_CFunc.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua_Call_C.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="memlimit.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="lproc.lua">
-      <Filter>源文件</Filter>
-    </None>
+    <None Include="BitArray.lua" />
+    <None Include="CCallLua.lua" />
+    <None Include="lproc.lua" />
+    <None Include="LuaCallC.lua" />
+    <None Include="memlimit.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

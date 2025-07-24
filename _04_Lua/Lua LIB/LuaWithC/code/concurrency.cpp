@@ -1,5 +1,6 @@
-#pragma comment(lib, "LuaDll.lib") 
-
+extern "C" {
+#include "test.h"
+}
 #include "lua.hpp"
 #include <string.h>
 #include <threads.h>
@@ -199,7 +200,7 @@ int luaopen_lproc(lua_State* L) {
 	return 1;
 }
 
-int main() {
+void test_lproc() {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_requiref(L, "lproc", luaopen_lproc, 1);
@@ -207,5 +208,5 @@ int main() {
 	luaL_dofile(L, "lproc.lua");
 	struct timespec tm = { .tv_sec = 1 };
 	lua_close(L);
-	return thrd_sleep(&tm, NULL);
+	thrd_sleep(&tm, NULL);
 }
