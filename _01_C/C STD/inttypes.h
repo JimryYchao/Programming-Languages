@@ -32,7 +32,7 @@ typedef _defined_ wchar_t;	    // 宽字符类型
 #define SCNdMAX     // intmax_t
 #define SCNdPTR     // intptr_t
 
-intmax_t imaxabs(intmax_t j);               //  绝对值
+intmax_t imaxabs(intmax_t j);                        //  绝对值
 imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom);   // 计算商余
 intmax_t strtoimax(const char * restrict nptr, char ** restrict endptr, int base);      // 字符串转整数
 intmax_t wcstoimax(const wchar_t *restrict nptr, wchar_t **restrict endptr, int base);  // 宽字符串转整数

@@ -28,13 +28,13 @@
 
 > *标准布局类*
 
-标准布局类类型满足：没有非标准布局类类型或引用的非静态数据成员或数组成员；所有非静态数据成员具有相同的可访问性；没有非标准布局的基类；继承层级中仅有一个类具有非静态数据成员。
+标准布局类类型满足：没有非标准布局类类型成员或引用的非静态数据成员或数组成员；所有非静态数据成员具有相同的可访问性；没有非标准布局的基类；继承层级中仅有一个类具有非静态数据成员。
 
 一个对象具有大小（`sizeof`）、对齐要求（`alignof`）、存储期、生存期、名称、类型、值、地址等信息。声明或继承至少一个虚函数的类类型对象是多态对象，这类对象包含一些额外的信息用于进行虚函数的调用。
 
 > *结构化类型*
 
-结构化类型可以具有 CV 限定，包括有数值类型、指向对象或函数的左值引用或指针、成员指针类型、枚举、`nullptr_t`、无闭包捕获的 Lambda、具有全部公开非 `mutable` 非静态数据成员（包括基类）且成员类型为结构化类型或数组的字面类类型。
+结构化类型可以具有 CV 限定，包括有数值类型、指向对象或函数的左值引用或指针、成员指针类型、枚举、`nullptr_t`、无闭包捕获的 Lambda、具有全部公开非 `mutable` 非静态数据成员（包括基类）且成员类型也是结构化类型或数组的字面类类型。
 
 >---
 #### 1.2. 布局与 POD
@@ -74,7 +74,7 @@ struct D
 {
 	int a;
 	int b;
-	D() {} // 具有用户定义否早函数
+	D() {} // 具有用户定义构造函数
 };
 struct POD
 {
@@ -106,7 +106,7 @@ int main()
 
 ```cpp
 struct alignas(8) S {
-	char alignas(4) v1;
+	char alignas(4) v1; 
 	double v2;
 };
 int main(){
@@ -165,7 +165,7 @@ namespace S {
 
 程序的实体（*Entity*）包括值、对象、引用、结构化绑定、函数、枚举器、类型、类成员、位字段、模板、模板专用化、命名空间或包等。标识符名称在所属名称空间遵循单一定义原则，函数重载支持同名但签名不同。
 
-变量是通过声明非静态数据成员或对象以外的引用来引入的。变量的名称（如果有）表示引用或对象。局部实体是具有自动存储期的变量、结构化绑定对应的变量，或 *this 对象。
+变量是通过声明非静态数据成员或对象以外的引用来引入的。变量的名称（如果有）表示引用或对象。局部实体是具有自动存储期的变量、结构化绑定对应的变量，或 `*this` 对象。
 
 声明可以（重新）将一个或多个名称和 / 或实体引入翻译单元，并指定这些名称的解释和语义属性。如果可以从实体或 *typedef-name* `X` 中获取另一个 `X` 声明，则该实体或 *typedef-name* `X` 的声明是 `X` 的重新声明。
 
@@ -210,31 +210,31 @@ extern X anotherX;  // declares anotherX
 using N::d;         // declares d
 ```
 
-在某些情况下，编译器会为一些定义声明隐式定义默认构造函数、赋值构造函数、移动构造函数、复制赋值运算符、移动赋值运算符或终结器。
+在某些情况下，编译器会为一些定义声明隐式定义默认构造函数、复制构造函数、移动构造函数、复制赋值运算符、移动赋值运算符或析构函数。
 
 ```c++
 struct C {
     std::string s; 
 };
-// 实现将隐式定义
+// 隐式定义
 struct C
 {
     std::string s;
-    C() : s() {}
-    C(const C &x) : s(x.s) {}
-    C(C &&x) : s(static_cast<std::string &&>(x.s)) {}
+    C() : s() {}				// 默认构造
+    C(const C &x) : s(x.s) {}	// 复制构造
+    C(C &&x) : s(static_cast<std::string &&>(x.s)) {}   // 移动构造
     // : s(std::move(x.s)) { }
-    C &operator=(const C &x){
+    C &operator=(const C &x){			// 复制赋值
         s = x.s;
         return *this;
     }
-    C &operator=(C &&x)
+    C &operator=(C &&x)					// 移动赋值
     {
         s = static_cast<std::string &&>(x.s);
         return *this;
     }
     // { s = std::move(x.s); return *this; }
-    ~C() {}
+    ~C() {}								// 析构
 };
 ```
 
@@ -541,7 +541,7 @@ export namespace B {    // 导出所有成员
 | `export <declaration>`,`export { <declaration-list> }` | 导出声明                        |
 | `[export] import <Name>`                               | 导入（再 `export`）一个模块单元 |
 | `[export] import <: Partition>`                        | 导入（再 `export`）一个模块分区 |
-| `[export] import <Head>`                               | 导入（再 `export`）一个头文件   |
+| `[export] import <Header>`                             | 导入（再 `export`）一个头文件   |
 
 ```cpp
 // （每行表示一个单独的翻译单元）
@@ -596,7 +596,7 @@ module <Name>[:<Partition>];    // 声明所属命名模块或模块分区
 
 C++23 标准库引入了两个命名模块：`std` 和 `std.compat`；
 
-- `import std` 导出 `std` 中定义的声明和名称，它还会导出 C 包装器标头的内容，例如 `<cstdio>` 和 `<cstdlib>`，提供类似 `std::printf()` 函数的内容。不会导出全局命名空间（如 `::printf()`）中定义的 C 函数。
+- `import std` 导出 `std` 中定义的声明和名称，它还会导出 C 包装器标头的内容，例如 `<cstdio>` 和 `<cstdlib>`，提供类似 `std::printf()` 函数的内容。
 
 - `import std.compat` 导出 `std` 中的所有内容，并添加 C 运行时全局命名空间，例如 `::printf`、`::fopen`、`::size_t`、`::strlen` 等。
 
@@ -606,10 +606,6 @@ int main() {
     printf("Hello World! %s", "CPP!");
 }
 ```
-
->---
-
-
 
 ---
 ### 2. 预处理指令
@@ -814,20 +810,22 @@ void example()
 
 编译器支持 ISO C99、C11、C17 和 ISO C++17 标准指定的以下预定义宏：
 
-- `__cplusplus`：当翻译单元编译为 C++ 时，定义为整数文本值。其他情况下则不定义。
-- `__DATE__`：当前源文件的编译日期。日期是 Mmm dd yyyy 格式的恒定长度字符串文本。月份名 Mmm 与 C 运行时库 (CRT) `asctime` 函数生成的缩写月份名相同。如果值小于 10，则日期 dd 的第一个字符为空格。任何情况下都会定义此宏。
-- `__FILE__`：当前源文件的名称。`__FILE__` 展开为字符型字符串文本。
-- `__LINE__`：定义为当前源文件中的整数行号。可使用 `#line` 指令来更改此宏的值。
-- `__STDC__`：仅在编译为 C，它定义为 1。其他情况下则不定义。
-`__STDC_HOSTED__`：如果实现是托管实现并且支持整个必需的标准库，则定义为 1。其他情况下则定义为 0。
-- `__STDC_NO_ATOMICS__` 如果实现不支持可选的标准原子，则定义为 1。
-- `__STDC_NO_COMPLEX__` 如果实现不支持可选的标准复数，则定义为 1。
-- `__STDC_NO_THREADS__` 如果实现不支持可选的标准线程，则定义为 1。
-- `__STDC_NO_VLA__` 如果实现不支持可选的可变长度数组，则定义为 1。
-- `__STDC_VERSION__` 标准 C 的 version。 
-- `__STDCPP_DEFAULT_NEW_ALIGNMENT__` 宏会扩展为 `size_t` 字面量，该字面量的对齐值由对非对齐感知的 `operator new` 的调用所保证。较大的对齐值传递到对齐感知重载，例如 `operator new(std::size_t, std::align_val_t)`。
-- `__STDCPP_THREADS__` 当且仅当程序可以有多个执行线程并编译为 C++ 时，定义为 1。其他情况下则不定义。
-- `__TIME__` 预处理翻译单元的翻译时间。时间是 hh:mm:ss 格式的字符型字符串文本，与 CRT `asctime` 函数返回的时间相同。任何情况下都会定义此宏。
+| macro                              | description                                                                                                                                                                                                 |
+| :--------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `__cplusplus`                      | 当翻译单元编译为 C++ 时，定义为整数文本值。其他情况下则不定义。                                                                                                                                             |
+| `__DATE__`                         | 当前源文件的编译日期。日期是 Mmm dd yyyy 格式的恒定长度字符串文本。月份名 Mmm 与 C 运行时库 (CRT) `asctime` 函数生成的缩写月份名相同。如果值小于 10，则日期 dd 的第一个字符为空格。任何情况下都会定义此宏。 |
+| `__FILE__`                         | 当前源文件的名称。`__FILE__` 展开为字符型字符串文本。                                                                                                                                                       |
+| `__LINE__`                         | 定义为当前源文件中的整数行号。可使用 `#line` 指令来更改此宏的值。                                                                                                                                           |
+| `__STDC__`                         | 仅在编译为 C，它定义为 1。其他情况下则不定义。                                                                                                                                                              |
+| `__STDC_HOSTED__`                  | 如果实现是托管实现并且支持整个必需的标准库，则定义为 1。其他情况下则定义为 0。                                                                                                                              |
+| `__STDC_NO_ATOMICS__`              | 如果实现不支持可选的标准原子，则定义为 1。                                                                                                                                                                  |
+| `__STDC_NO_COMPLEX__`              | 如果实现不支持可选的标准复数，则定义为 1。                                                                                                                                                                  |
+| `__STDC_NO_THREADS__`              | 如果实现不支持可选的标准线程，则定义为 1。                                                                                                                                                                  |
+| `__STDC_NO_VLA__`                  | 如果实现不支持可选的可变长度数组，则定义为 1。                                                                                                                                                              |
+| `__STDC_VERSION__`                 | 标准 C 的 version。                                                                                                                                                                                         |
+| `__STDCPP_DEFAULT_NEW_ALIGNMENT__` | 宏会扩展为 `size_t` 字面量，该字面量的对齐值由对非对齐感知的 `operator new` 的调用所保证。较大的对齐值传递到对齐感知重载，例如 `operator new(std::size_t, std::align_val_t)`。                              |
+| `__STDCPP_THREADS__`               | 当且仅当程序可以有多个执行线程并编译为 C++ 时，定义为 1。其他情况下则不定义。                                                                                                                               |
+| `__TIME__`                         | 预处理翻译单元的翻译时间。时间是 hh:mm:ss 格式的字符型字符串文本，与 CRT `asctime` 函数返回的时间相同。任何情况下都会定义此宏。                                                                             |
 
 
 ---
@@ -851,7 +849,7 @@ int main() {
 	mgr.DoSomething();
 	CustomData::Func(mgr);
 	// using 声明
-	using CustomData::ObjectManager;  // 导入 ObjectManager
+	using CustomData::ObjectManager;  // 仅导入 ObjectManager
 	ObjectManager mgr;
 	mgr.DoSomething();
 	// using 指令
@@ -914,7 +912,7 @@ namespace Parent
         };
         void Func();
     }
-    template<> class C<int> {};  // 专门化
+    template<> class C<int> {};  // 专用化
     void new_ns::Func() {		 // 提供实现
         cout << 1;
     }
@@ -1079,9 +1077,15 @@ int main()
 
 ```cpp
 extern "C"|"C++" Decl | { Decl-List }
+
+extern "C" void Func();
+extern "C" {
+#include "CHeader.h"   // 可能由 CHeader.c 提供实现
+}
+
 ```
 
-`"C"++` 为默认语言连接；`"C"` 允许与 C 函数链接并在 C++ 程序中定义可以从 C 翻译单元调用的函数。
+`"C++"` 为默认语言连接；`"C"` 允许 C++ 程序连接在 C 翻译单元定义的函数，并遵循 C 调用约定。
 
 ```cpp
 extern "C" int open(const char *path_name, int flags); // C function declaration
@@ -1109,7 +1113,7 @@ struct A<T>::B {
 >---
 #### 4.4. constexpr, consteval, constinit
 
-`constexpr` 声明可以在编译时求出实体的值，这些实体（变量、函数等）用于编译时的常量表达式。`consteval` 指定函数为立即函数，对函数的每次调用都必须产生编译时常量。`constinit` 断言变量具有静态初始化，即零初始化和常量初始化；当声明的变量是引用时，`constinit` 等价于 `constexpr`；`extern constinit` 告知引用外部已初始化的变量。
+`constexpr` 声明可以在编译时求出实体的值，这些实体（变量、函数等）用于编译时的常量表达式。`consteval` 指定函数为立即函数，对函数的每次调用都必须产生编译时常量。`constinit` 断言变量具有静态初始化，即零初始化和常量初始化；当声明的变量是引用时，`constinit` 等价于 `constexpr`；`extern constinit` 引用外部已初始化的变量。
 
 ```cpp
 consteval int InitEval() {
@@ -1203,7 +1207,7 @@ _ = 0.0;        // false
 
 | Suffix     | description        |
 | :--------- | :----------------- |
-| `u`,`U`    | 无符号整数         |
+| `u`, `U`    | 无符号整数         |
 | `l`, `L`   | `long/long long`   |
 | `ll`, `LL` | `long long`        |
 | `z`        | `size_t`,`ssize_t` |
@@ -1275,7 +1279,7 @@ char u5 = '\U00000041'; // \U HHHHHHHH 'A'
 字符串文本的种类、类型及其关联的字符编码由其编码前缀和字符序列决定。常规字符串文本和 UTF-8 字符串文本称为窄字符串文本。
 
 ```c++
-auto s0 =   "hello";   // const char*
+auto s0 =   "hello";   // const char* 
 auto s1 = u8"hello";   // const char8_t* 
 auto s2 =  L"hello";   // const wchar_t*
 auto s3 =  u"hello";   // const char16_t*, encoded as UTF-16
@@ -1316,13 +1320,14 @@ auto hi = u8"hello" " " "world"s;
 auto err = U"hello" " " L"world"; // disagree on prefix
 ```
 
+---
 ### 6. 枚举
 
-枚举包含一组命名的关联常数项，具有基础整数类型（默认为 `int`），默认从 0 开始递增。枚举分为非区分范围枚举（`enum`，枚举项直接访问）和范围枚举（`enum class`，枚举项由枚举名称限定访问），
+枚举包含一组命名的关联常数项，具有基础整数类型（默认为 `int`），默认从 0 开始递增。枚举分为无作用域枚举（`enum`，枚举项直接访问）和作用域枚举（`enum class`，枚举项由枚举名称限定访问），
 
 ```c++
 enum Identifier [: integerType ] { ... }                 // 无作用域枚举
-enum  class | struct  Identifier [: integerType ] {...}  // 作用域枚举
+enum  class | struct  Identifier [: integerType ] { ... }  // 作用域枚举
 ```
 
 无作用域枚举项可以隐式转换为整数；作用域枚举项需要 `static_cast` 强制转换。
@@ -1338,7 +1343,7 @@ int main() {
     Suit kind = Suit::Hearts;
 
     int tue = Tuesday;
-    int clubs = static_cast<int>( Suit::Clubs);
+    int clubs = static_cast<int>(Suit::Clubs);
 }
 ```
 
@@ -1395,7 +1400,7 @@ int main() {
 >---
 #### 6.2. using enum
 
-`using enum E;` 声明将 `E` 枚举项作为成员引入到全局范围、命名空间、或类型中，在声明的范围内枚举名称可见。在块范围中为导入声明。
+`using enum E` 声明将 `E` 的枚举项作为成员引入到声明范围内。
 
 ```cpp
 enum class E { a, b, c, d };
@@ -1408,10 +1413,10 @@ namespace N {
 }
 int main() {
 	using enum E;
-	auto e = a;
-	auto e1 = ::b;  
-	auto e2 = S::c;
-	auto e2 = N::c;
+	auto ea = a;
+	auto eb = ::b;  
+	auto sc = S::c;
+	auto nc = N::c;
 }
 ```
 
@@ -1471,7 +1476,7 @@ string s = string("h") + "e" + "ll" + "o";
         std::cout << s;                     // 未定义行为
     }
     ```
-+ 在函数调用中绑定到函数形参的临时量，生存期仅到当次函数调用的全表达式结尾为止；如果函数返回一个生命长于全表达式的引用，那么它会成为悬垂引用。
++ 在函数调用中绑定到函数形参的临时量，生存期仅到当前函数调用的全表达式结尾为止；如果函数返回一个生命长于全表达式的引用，那么它会成为悬垂引用。
 
     ```cpp
     const string& forwardRef(const string& param) {
@@ -1560,17 +1565,36 @@ volatile const int* const volatile cvpcv = &num;   // 指向 CV 对象的 CV 指
 `new` 运算返回一个堆分配对象的指针，当不再需要堆分配的对象时，必须对拥有对象的指针（或其副本）显式释放（`delete`），未能释放内存将会导致内存泄漏。。
 
 ```c++
-MyClass* mc = new MyClass(); // allocate object on the heap
+MyClass* mc = new MyClass; // allocate object on the heap
 mc->print(); // access class member
 delete mc; 	 // delete object (please don't forget!)
+
+int *arr = new int[size];
+delete[] arr;
 ```
 
 指针和数组密切相关。当数组按值传递给函数时，它将作为指向第一个元素的指针传递。
-- `sizeof` 运算符返回数组的总大小（以字节为单位）；
-- 当数组被传递给函数时，它会衰减为指针类型；
-- 当 `sizeof` 运算符应用于指针时，它将返回指针大小。
+- `sizeof array` 返回数组的总大小（以字节为单位）；
+- 当数组作为参数传递给函数时，它会衰减为指针类型；当 `sizeof` 运算符应用于指针时，它将返回指针大小。
 
 `void*` 的指针仅指向原始内存位置。例如在 C++ 代码和 C 函数之间传递时需要使用 `void*`；将类型化指针强制转换为 `void*` 时，内容保持不变但类型信息丢失，无法执行递增或递减操作。
+
+> **指针运算**
+
+```c++
+// address-of
+int * pi = &i;
+const type cp = &const_type;
+volatile type vp = &vola_type;
+// 算数
+int * p = p + integer;
+p += integer;
+p++;
+int * p = p - integer;
+p -= integer;
+p--;
+ptrdiff_t diff = p1 - p2;
+```
 
 
 >---
@@ -1616,22 +1640,6 @@ DFun& df = foo;
 void (*P)(int) = foo;
 ```
 
-> **指针运算**
-
-```c++
-// address-of
-int * pi = &i;
-const type cp = &const_type;
-volatile type vp = &vola_type;
-// 算数
-int * p = p + integer;
-p += integer;
-p++;
-int * p = p - integer;
-p -= integer;
-p--;
-ptrdiff_t diff = p1 - p2;
-```
 
 >---
 #### 8.2. 成员指针
@@ -1656,7 +1664,7 @@ int main() {
 }
 ```
 
-指向一个可访问且无歧义的非虚基类数据成员的指针，可以隐式转换成指向派生类的同一数据成员的指针。从指向派生类的数据或非虚函数的成员指针到指向无歧义（非虚）基类的成员指针，允许由 `static_cast` 和显式转换来进行，即使基类没有该成员。
+指向一个可访问且无歧义（非虚）基类数据成员的指针，可以隐式转换成指向派生类的同一数据成员的指针。从指向派生类的数据或非虚函数的成员指针到指向无歧义（非虚）基类的成员指针，允许由 `static_cast` 和显式转换来进行，即使基类没有该成员。
 
 ```cpp
 
@@ -1936,7 +1944,7 @@ int main() {
 ---
 ### 9. 数组
 
-数组具有相同类型、连续存储数组元素的对象序列，不存在引用的数组或函数的数组。分配和访问堆栈数组的速度比堆数组更快，堆栈数组在编译时长度确定。堆数组通常由 `new T[size]` 分配，并由 `delete[] T` 负责释放。堆栈数组在函数返回时自动清理。CV 限定将作用于数组元素类型而不是数组本身。动态分配的数组大小可以为零，即 `new T[0]`。
+数组具有相同类型、连续存储数组元素的对象序列，无法创建引用的数组或函数的数组。分配和访问堆栈数组的速度比堆数组更快，堆栈数组在编译时长度确定。堆数组通常由 `new T[size]` 分配，并由 `delete[] T` 负责释放。堆栈数组在函数返回时自动清理。CV 限定将作用于数组元素类型而不是数组本身。动态分配的数组大小可以为零，即 `new T[0]`。
 
 
 ```c++
@@ -1977,7 +1985,7 @@ int (*parr3)[6][7] = arr3;
 ```
 
 >---
-#### 9.1. **数组初始化**
+#### 9.1. 数组初始化
 
 数组是一种聚合体，由聚合初始化器初始化：
 
@@ -2014,12 +2022,13 @@ int main() {
 >---
 #### 9.2. 字符数组
 
-字符数组可以由相应类型的字符串字面值直接初始化，字符数组长度应大于字符串长度（包括隐式的空终止符），剩余元素零初始化。
+字符数组可以由相应类型的字符串字面值直接初始化，字符数组长度必须足够容纳字符串长度（包括隐式的空终止符），剩余元素零初始化。
 
 ```c
 char hi[] = "Hi"; // char[3] {'\H','i','\0'}
 char hi2[4] = "Hi"; // char[4] {'\H','i','\0','\0'}
 wchar_t hi3[6] = { L"Hello" };  // len >= 6;
+char err[5] = "Hello World";
 ```
 
 
@@ -2031,7 +2040,7 @@ C++ 语言包括所有 C 运算符并添加多个新的运算符。C++ 运算符
 
 | Category     | Operators                                                                                            |
 | :----------- | :--------------------------------------------------------------------------------------------------- |
-| 基本表达式   | `x::y`,`x.y`,`x->y`,`f(x)`,`x[y]`,`x++`,`x--`,`typeid(x)`,`T{v}`                                     |
+| 基本表达式   | `x::y`,`x.y`,`x->y`,`f(x)`,`x[y]`,`x++`,`x--`,`typeid(x)`,`T{v}`,`T(x)`                                    |
 | cast 表达式  | `const_cast`,`dynamic_cast`,`reinterpret_cast`,`static_cast`                                         |
 | 一元         | `sizeof(x \| T)`,`++x`,`--x`,`~x`,`!x`,`-x`,`+x`,`&x`,`*x`,`new`,`delete`,`(T)v`                     |
 | 指向成员指针 | `x.*p`,`x->*p`                                                                                       |
@@ -2045,7 +2054,7 @@ C++ 语言包括所有 C 运算符并添加多个新的运算符。C++ 运算符
 | 三目运算     | `cond ? <true> expr1 : <false> expr2`                                                                |
 | 赋值         | `x = y`,`x *= y`,`x /= y`,`x %= y`,`x += y`,`x -= y`,`x <<= y`,`x >>= y`,`x &= y`,`x \|= y`,`x ^= y` |
 | 异常         | `throw`                                                                                              |
-| 逗号运算     | `(expr1, expr2 [, expr3, ... exprN])` 返回 `exprN` 表达式结果                                        |
+| 逗号运算     | `(expr1, expr2 [, expr3, ..., exprN])` 返回 `exprN` 表达式结果                                        |
           
 > **表达式值类别**
 
@@ -2109,9 +2118,9 @@ struct Point { int x, y; };
 int main()
 {
 	auto p = Point(1, 2);
-	p = Point{ 1, 2 };
-	p = Point{ .x = 1, .y = 2 };
-	p = typename ::Point{ 1,2 };
+	auto p1 = Point(p);
+	auto p2 = Point{ p };
+	auto p3 = typename ::Point{ p };
 }
 ```
 
@@ -2121,8 +2130,8 @@ int main()
 operator <Type-id>                      // 隐式转换
 explicit operator <Type-id>             // 显式转换
 explicit (bool-expr) operator <Type-id> // 条件转换。true 为显式，false 为隐式
-operator auto | decltype(auto)          // type-id 可以是 auto 占位
 
+operator auto | decltype(auto)          // type-id 可以是 auto 占位
 ```
 
 *Type-id* 不能是函数、数组、或出现运算符 `[]`（可以是数组指针别名）。
@@ -2135,7 +2144,8 @@ public:
 	KM() { distance = 0; };
 	KM(long double dis) { distance = dis; };
 	operator long double() { return distance; }   // 隐式类型转换
-	explicit operator string() { return to_string(distance) + "km"; }  // 显式类型转换
+	string toString() { return to_string(distance) + "km"; }
+	explicit operator string() { return this->toString(); }  // 显式类型转换
 
 	KM operator=(int dis) { return KM{ (long double)dis }; }
 	KM operator=(long double dis) { return KM{ dis }; }
@@ -2148,12 +2158,12 @@ KM operator ""km(unsigned long long dis) {
 	return KM{ (long double)dis };
 };
 int main() {
-	KM d1 = 10km;    // int to KM
-	KM d2 = 3.14km;  // double to KM
+	KM d1 = 10km;
+	KM d2 = 3.14km;
 	KM d3 = 10;
-	KM d4 = 3.14L;
+	KM d4 = 3.14f;
 	long double d = d1;  // or (long double)d1;
-	cout << string(d1);  // 10.000000km
+	cout << d1.toString();  // 10.000000km
 }
 ```
 
@@ -2171,7 +2181,7 @@ int main() {
 	D d;
 	B& b1 = d;
 	D d2 = b1;   // D
-	d.operator void();  // void
+	d.operator void();  // 函数调用
 	B& b2 = d.operator B & ();  // B&
 }
 ```
@@ -2629,7 +2639,7 @@ default:break; // warning: fallthrough
 }
 ```
 
-在 `case` 中声明的变量属于 `switch` 语句范围，它们共享名称。
+在 `case` 中声明的变量属于 `switch` 语句范围，它们共享名称。避免空引用访问。
 
 ```c++
 /* 
@@ -2700,6 +2710,8 @@ for ( [init-expr;] elem-declaration : expression ) {
 int x[10]{ 1,2,3,4,5,6,7,8,9,0 };
 for (auto e : x)
     cout << e << ",";
+for (typedef T = int; T e : x)
+	// something
 ```
 
 `for` 可以 *range* 的类型包括数组、拥有 `.begin()` 和 `.end()` 的容器或用户定义类型。
@@ -2784,8 +2796,8 @@ Test1:
 ### 12. 函数类型
 
 函数声明可以在任何作用域出现，可以作为非成员函数、友元函数、成员函数；函数定义仅在命名空间或类的作用域中出现。函数的返回类型不能是函数类型或数组类型，但可以是指针或引用。
-- 非静态成员函数可以具有 CV 和引用（*ref*）限定。
-- 非成员函数可以具有链接属性。
+- 非静态成员函数可以具有 CV 和 REF 限定。
+- 非成员函数可以具有链接属性（`extern` or `static`）。
 - `requires` 声明与模板化函数关联的约束，属于函数签名的一部分。
 - `noexcept` 声明函数异常规范。
 - 对于返回类型复杂时，函数声明可以是尾随返回形式（`auto`）。
@@ -2809,7 +2821,7 @@ struct S {
 
 > **返回类型推导**
 
-返回声明为类型占位符 `auto` 表示使用返回类型推导；如果返回类型是 `decltype(auto)`，那么返回类型是将 `return expr` 的操作数到 `decltype( expr )` 中时所得到的类型。虚函数和协程不能使用返回类型推导。
+返回声明为类型占位符 `auto` 表示使用返回类型推导；如果返回类型是 `decltype(auto)`，那么返回类型是将 `return expr` 的操作数到 `decltype( expr )` 中时所得到的类型。虚函数和协程不支持返回类型推导。
 
 ```cpp
 int x = 0;
@@ -2830,7 +2842,7 @@ Param = [Attr] ParamDecl [= Initializer]
        | void                 
 ```
 
-具有 `this` 显式对象形参的成员函数非虚非静态，可以是 lambda，无 CV 和引用限定。显式对象形参只能是首个形参，无默认值。其他非静态成员函数具有隐式对象形参 `this`。尾随参数可以具有默认值，虚函数的重写函数不会从基类定义获得默认实参。
+具有 `this` 显式对象形参的成员函数非虚非静态，可以是 lambda，无 CV 和引用限定。显式对象形参只能是首个形参，无默认值。其他非静态成员函数具有隐式对象形参 `this`。尾随参数可以具有默认值（默认参数），虚函数的重写函数不会从基类定义获得默认实参。
 
 ```cpp
 struct S {
@@ -2873,7 +2885,7 @@ Iterator(1, 2, 3, 4, 5);
 >---
 #### 12.2. **函数定义**
 
-非静态成员函数可以定义虚说明（`override`、`final`），`virtual` 声明虚函数。非成员函数只能在命名空间范围定义，成员函数类范围定义默认具有 `inline` 内联。显式预置（`default`）的函数只能是特殊成员函数或比较运算符函数。任何弃置（`delete`）函数的使用都会导致程序无法编译。
+非静态成员函数 `virtual` 声明（纯）虚函数，`override` 重写基类虚函数，`final` 声明密封。非成员函数只能在命名空间范围定义，成员函数类范围定义默认具有 `inline` 内联。显式预置（`default`）的函数只能是特殊成员函数或比较运算符函数。任何弃置（`delete`）函数的使用都会导致程序无法编译。
 
 ```cpp
 struct B1 {
@@ -2888,6 +2900,7 @@ struct B2 {
 struct D : B1, B2 {
 	void B1::FuncA() override final {}  // 纯虚重写，密封
 	void FuncB() override {}            // 重写
+	bool operator <=> (const D& other) const = default;   // 默认比较运算符
     static inline void inFunc() {}		// 内联函数
     void FuncD() noexcept try {	}		// 函数 try 块
 	catch (...) { }
@@ -2912,6 +2925,7 @@ struct Sample
 	void implicitFunc() {}
 	void* operator new(std::size_t) = delete;  
 	Sample* operator &() = delete;  
+
 };
 Sample::Sample() {}  // not inline
 inline void Sample::Func() {};   // explicit inline
@@ -2924,22 +2938,24 @@ void Sample::InlineFunc() {};    // inline
 #### 12.3. lambda 表达式
 
 ```cpp
-[Captures] [FrontAttr] (Params)? [[Specs][Except][BackAttr]] [-> Trailing][Requires] { Body };
+[Captures] [FrontAttr] (Params)? [[Specs] [Except] [BackAttr]] [-> Trailing][Requires] { Body };
 [Captures] <TParams> [TRequires] [FrontAttr] (Params)? [[Specs][Except][BackAttr]] [-> Trailing][Requires] { Body };
+```
 
+lambda 支持闭包。*Specs* 可以是 `mutable|static`、`constexpr|consteval`。lambda 默认是 `const`，除非是 `mutable` 或具有显式对象形参 `this`。`mutable` 允许函数体修改按复制捕获的对象，以及调用非 `const` 成员函数。`static` 具有空捕获规范。
+
+```c++
 [] (int v) static constexpr -> int {return v;}    // 无捕获静态 lambda
 [] <class C> -> decltype(auto) { return C{}; };   // lambda 模板
 [=, &i] { i++; };           // 默认按复制捕获，引用捕获 i
 [&, i] { return i * i; };   // 默认按引用捕获，复制捕获 i
 ```
 
-lambda 表达式可以构造闭包，是能够捕获作用域中的变量的匿名函数对象。*Specs* 支持 `mutable|static`、`constexpr|consteval`。lambda 默认是 `const`，除非是 `mutable` 或具有显式对象形参 `this`。`mutable` 允许函数体修改按复制捕获的对象，以及调用非 `const` 成员函数。`static` 具有空捕获规范。
-
 > **Captures**
 
-`[ ]` 无捕获；`[=]` 默认为按值捕获，后继的简单捕获只能显式按引用 `&v` ；`[&]` 默认为按引用捕获，后继的简单捕获只能显式按值复制 `v`；在类非静态成员函数中可以将 `this` 传递给 *Capture*，`*this` 按值复制传递。当 `[=]` 或 `[&]` 总能
+`[ ]` 无捕获；`[=]` 默认为按值捕获，后继的简单捕获只能显式按引用 `&v` ；`[&]` 默认为按引用捕获，后继的简单捕获只能显式按值复制 `v`；在类非静态成员函数中可以将 `this` 传递给 *Capture*，`*this` 按值复制传递。
 
-如果按引用隐式或显式捕获非引用实体，而在该实体的生存期结束之后调用闭包对象的 `lambda()`，会发生未定义行为。C++ 的闭包并不延长按引用捕获对象的生存期。
+如果按引用（隐式或显式）捕获非引用实体，而在该实体的生存期结束之后调用闭包对象的 `lambda()`，会发生未定义行为。C++ 的闭包并不延长按引用捕获对象的生存期。
  
 ```cpp
 struct S { void f(int i); };
@@ -2975,12 +2991,12 @@ auto y = [&r = x, x = x + 1]() -> int {
 如果 lambda 表达式在默认实参中出现，那么它不能显式或隐式捕获任何内容，除非所有捕获都带有初始化器，并满足可以在默认实参中出现的表达式的约束条件。
 
 ```cpp
-void f()
+struct S
 {
 	int i = 1;
 
 	void g1(int = [i] { return i; }()); // ERR：有捕获内容
-	void g2(int = [i] { return 0; }()); // ERR：有捕获内容
+	void g2(int u, int = [i] { return 0; }()); // ERR：有捕获内容
 	void g3(int = [=] { return i; }()); // ERR：有捕获内容
 
 	void g4(int = [=] { return 0; }());       // OK：无捕获
@@ -3073,7 +3089,7 @@ struct LambdaType : Lambda {
 
 c++ 协程设计为无栈协程，通过返回到调用方来暂停执行。允许顺序代码异步执行。不使用可变参数、占位符返回类型、常规 `return` 语句。`constexpr/consteval`、构造函数、析构函数不能是协程函数。
 
-可将将协程的激活帧视为堆栈帧和协程帧，协程帧保留重新激活协程函数状态的信息，因此该帧在协程暂停时仍然存在；而堆栈帧在协程暂停时释放。
+可将协程的激活帧视为堆栈帧和协程帧，协程帧保留重新激活协程函数状态的信息，因此该帧在协程暂停时仍然存在；而堆栈帧在协程暂停时释放。
 
 协程 [^[↗]^](https://lewissbaker.github.io/2017/09/25/coroutine-theory) 将函数 *Call* 和 *Return* 操作中的一些步骤拆分出一些额外的操作：*Suspend*、*Resume*、*Destroy*：
 - *Suspend* 暂停协程当前点的执行并将执行返回调用方，且不会销毁协程的激活帧。*Suspend* 点由 `co_await` 和 `co_yield` 标识。当协程触及 *Suspend* 时将协程当前调用堆栈寄存器保存的任何值写入协程帧。保存一个值指示协程在哪个挂起点暂停，并由后续的 *Resume* 执行恢复这些值或 *Destroy* 执行销毁这些值。协程在暂停点返回调用方之前额外附加一个可以访问协程帧的句柄  *handle*，以用于在稍后恢复或销毁协程帧。
@@ -3349,9 +3365,9 @@ std::istream& operator>>(std::istream& is, T& obj) {
 struct Counter
 {
 	int count = 0;
-	// prefix increment
+	// ++Counter
 	Counter& operator++() { return (++count, *this); }
-	// postfix increment
+	// Counter++
 	Counter operator++(int)
 	{
 		Counter old = *this; // copy old value
@@ -3359,9 +3375,9 @@ struct Counter
 		return old;          // return old value
 	}
 
-	// prefix decrement
+	// --Counter
 	Counter& operator--() { return (--count, *this); }
-	// postfix decrement
+	// Counter--
 	Counter operator--(int)
 	{
 		Counter old = *this; // copy old value
@@ -3371,31 +3387,45 @@ struct Counter
 };
 ```
 
-二元运算符通常实现为非成员，以保持对称性（*T + v*, *v + T*）；而成员函数仅支持 *T + v* 而不是 *v + T*；
+二元运算符通常实现为非成员，以保持对称性（*T op v*, *v op T*）；而成员函数仅支持 *T op v* 而不是 *v op T*；
+
+```cpp
+struct Point {
+	int x, y;
+	Point operator * (int m) { return Point(x * m, y * m); }
+};
+
+Point operator + (const Point& p1, const Point& p2) { return Point(p1.x + p2.x, p1.y + p2.y); }
+int main() {
+	Point p1{ 1,2 }, p2{ 3,4 };
+	Point p = p1 + p2;   // T+v, v+T; (4,6)
+	Point p3 = p * 10;   // T*v; (40,60)
+}
+```
 
 >---
 #### 12.6. 用户定义文本函数
 
-用户定义文本可以是整数、浮点数、字符或字符串用户定义，用户定义文本由一个用户定义后缀标识。用户定义文本被视为对文本运算符或文本运算符模板的调用。
+用户定义文本可以是整数、浮点数、字符或字符串用户定义，用户定义文本由一个用户定义后缀标识。用户定义文本被视为对文本运算符或文本运算符模板的调用。字符串用户定义文本函数需要两个参数：`const charType*` 和 `size_t`（允许单个参数 `const char *` 的原始字面量）。
 
 ```c++
 using namespace std;
 long double operator""_w(long double);
-string operator""_w(const char16_t *, size_t);
-unsigned operator""_w(const char *);
+string operator""_w(const char16_t *, size_t);  // u"str"_w
+unsigned operator""_w(const char *);	// 
 int main()
 {
-    1.2_w;	  // calls operator ""_w(1.2L)
-    u"one"_w; // calls operator ""_w(u"one", 3)
-    12_w;	  // calls operator ""_w("12")
-    "two"_w;  // error: no applicable literal operator
+    1.2_w;	  // operator ""_w(1.2L)
+    u"one"_w; // operator ""_w(u"one", 3)
+    12_w;	  // operator ""_w("12")
+    "two"_w;  // error: 匹配 operator""_w(const char *, size_t)
 }
 ```
 
 ---
 ### 13. 类类型
 
-类类型为值类型，包含 `class`、`struct`、`union`，其中联合体类型隐式密封。类成员可以声明静态过非静态的数据成员和成员函数、成员 *typedefs* 或 *usings*、成员枚举、嵌套类和友元声明。类内部定义的成员函数隐式内联，除非是命名模块导出。
+类类型为值类型，包含 `class`、`struct`、`union`，其中联合体类型隐式密封。类成员可以声明静态或非静态的数据成员和成员函数、成员 *typedefs* 或 *usings*、成员枚举、嵌套类和友元声明。类内部定义的成员函数隐式内联，除非是命名模块导出（`export`）。
 
 ```cpp
 class S {
@@ -3432,7 +3462,7 @@ public:
 };
 ```
 
-可以函数块声明局部类，局部类不包含静态数据成员，成员函数类内部定义且无链接，无友元模板和友元函数，非闭包类型的局部类没有成员模板。
+可以函数块声明局部类，局部类不包含静态数据成员，成员函数在类内部定义且无链接，无友元模板和友元函数，非闭包类型的局部类没有成员模板。
 
 ```cpp
 int main()
@@ -3461,7 +3491,7 @@ struct S {
 int S::sv = 10010;
 ```
 
-嵌入的匿名类不能是静态，不包含非公共成员、静态成员、任何成员函数、构造函数和析构函数、不能作为参数传递、无法作为函数中返回值返回。
+嵌入的匿名类非静态，且只包含公共的非静态数据成员。
 
 ```c++
 struct S {
@@ -3481,7 +3511,7 @@ struct S {
 S s{ 1,2,3 };
 ```
 
-表达式 `this` 是一个 纯右值 表达式，其值是隐式对象形参的地址。CV 成员函数的 `this` 也是 CV `T*`，且仅由对应的 CV 对象调用；*ref* 限定的成员函数只会限定隐式对象，不会限定 `this` 指针；构造函数和析构函数的 `this` 始终为 `T*`。可以执行 `delete this;`，应确保对象是由 new 分配的。在 `delete this;` 返回后，使指向已释放对象的每个指针都无效，包括 `this` 指针本身。
+表达式 `this` 是一个 **纯右值** 表达式，其值是隐式对象形参的地址。CV 成员函数的 `this` 也是 CV 限定的 `T*`，且仅由对应的 CV 对象调用；REF 限定的成员函数只会限定隐式对象，不会限定 `this` 指针；构造函数和析构函数的 `this` 始终为 `T*`。可以 `delete this;`，应确保对象是由 `new` 分配的。
 
 ```cpp
 struct Counter {
@@ -3509,17 +3539,17 @@ int main() {
 }
 ```
 
-非虚非静态成员函数可以声明显式对象形参，允许推导类型和值类别，无 CV 和引用限定。指向显式对象成员函数的指针是普通的函数指针，而不是成员指针。
+非虚非静态成员函数（无 CV 和引用限定）可以声明显式对象形参，允许推导类型（`this auto`）和值类别（`this T`）。指向显式对象成员函数的指针是普通的函数指针，而不是成员指针。
 
 ```cpp
 struct S {
-	int g(this const S&, int, int);
+	int g(this const S&, int, int);  // 显式对象形参
 };
 int main() {
 	S s{};
 	auto pf = &S::g;
 	pf(s, 3, 4);	// ok
-	(s.*pf)(3, 4);  // error: “pg” is not a pointer to member function
+	(s.*pf)(3, 4);  // error: “pf” is not a pointer to member function
 }
 ```
 
@@ -3545,7 +3575,7 @@ private:
 
 > **可访问性**
 
-`class` 默认对其成员及其基类具有 `private`。`struct` 默认对其成员及其基类具有 `public`。`union` 默认对其成员具有 `public`。成员或基类可声明 `public`、`protected`、`private`。限定基类访问隐式限定继承的基类成员的访问。
+`class` 默认对其成员及其基类具有 `private`。`struct` 默认对其成员及其基类具有 `public`。`union` 默认对其成员具有 `public`。成员或基类可声明 `public`、`protected`、`private`，限定继承的成员在派生类中的可访问性。
 
 ```cpp
 struct A {
@@ -3561,7 +3591,7 @@ struct C : public B {
 
 > *注入类名* 
 
-在C++中，​注入类名（injected class name）​是指类或类模板的作用域内，类名被视为该类的公共成员名，可以直接使用而无需通过作用域解析运算符（::）显式引用。注入类名是可继承的。非公共继承的间接基类的注入类名可能在派生类中变得不可访问。
+​*注入类名* ​是指类或类模板的作用域内，类名被视为该类的公共成员名，可以直接使用而无需通过作用域解析运算符（::）显式引用。注入类名是可继承的。非公共继承的间接基类的注入类名可能在派生类中变得不可访问。
 
 ```cpp
 int X;
@@ -3587,9 +3617,9 @@ struct C : public B {
 >---
 #### 13.1. 构造函数
 
-构造函数允许的说明符是 `friend`、`inline`、`constexpr`、`consteval` 和 `explicit`。构造函数可选具有成员初始化表达式列表，该列表会在构造函数主体运行之前初始化类成员。`constexpr` 构造函数是其类型成为字面类型。
+构造函数允许的说明符是 `friend`、`inline`、`constexpr`、`consteval` 和 `explicit`。构造函数可选具有成员初始化表达式列表，该列表会在构造函数主体运行之前初始化类成员。`constexpr` 构造函数使其类型成为字面类型。
 
-在某些情况下，特殊成员函数即使用户未定义也会由编译器定义。它们是 *默认构造函数*、*复制构造函数*、*移动构造函数*、*复制赋值运算符*、*移动赋值运算符*、*析构函数*，默认 `inline public`，可以显式声明弃置以阻止默认生成。特殊成员函数以及比较运算符是唯一可以默认化（`= default`）的函数。
+在某些情况下，特殊成员函数即使用户未定义也会由编译器定义。它们是 *默认构造函数*、*复制构造函数*、*移动构造函数*、*复制赋值运算符*、*移动赋值运算符*、*析构函数*，默认 `inline public`，可以显式声明弃置（`= delete`）以阻止默认生成。特殊成员函数以及比较运算符是唯一可以默认化（`= default`）的函数。
 
 
 ```cpp
@@ -3603,22 +3633,21 @@ constexpr Point origin{};            // 字面类型
 
 > *转换构造函数*
 
-没有 `explicit` 的构造函数且至少带有一个非默认参数被称为转换构造函数。隐式声明和用户定义的非显式复制构造函数和移动构造函数都是转换构造函数。
+*转换构造函数* 至少带有一个非默认参数。隐式声明和用户定义的非显式（`explicit`）复制构造函数和移动构造函数都是转换构造函数。
 
 ```cpp
 struct S {
-	explicit S() {}             // 仅显式转换
-	explicit (true) S(int) {}   // 支持隐式转换
-	S(int, int) {}
+	explicit S(std::string) {}    // 仅显式转换
+	S(int) {};   				  // 支持隐式转换
+	S(int, int) {};
 };
 int main() {
-	S s1 = 1;          // err
-	S s2 = (S)1;       // ok
-	S s3(3);           // ok
-	S s4{ 4, 4 };      // ok
-	S s5 = { 5, 5 };   // ok
-	S s6;              // ok;
-	S s7 = {};		   // err
+	S s1 = 1;          // ok
+	S s2(3);           // ok
+	S s3 = { 5, 5 };   // ok
+	S s4 = {};		   // err
+	S s5 = "Hello";	   // err
+	S s6 = (S)"Hello"; // ok
 }
 ```
 
@@ -3645,7 +3674,7 @@ int main()
 
 > *委托构造函数*
 
-构造函数可以在成员初始化列表中使用其他构造函数。委托构造函数无法递归，不包含其他成员初始化器。
+构造函数可以在成员初始化列表中使用其他构造函数，不包含成员初始化器。
 
 ```c++
 struct Point {
@@ -3658,7 +3687,7 @@ struct Point {
 
 > *继承构造函数*
 
-`using Base::Base` 声明基类时，将基类的构造函数引入基类中。
+`using Base::Base` 将基类的构造函数引入到派生类中。
 
 ```cpp
 struct Base {
@@ -3676,7 +3705,7 @@ struct DerivedB : Base {
 
 > **复制构造函数**
 
-复制构造函数通过从相同类型的对象复制成员值来初始化对象。成员中存在指针时，自动生成复制构造只会复制指针值，因此可能需要自定义声明以分配指针内存。复制构造函数的首元参数为 `T&`，可以具有 CV 限定；若包含其他参数，需要具有默认实参。
+复制构造函数通过从相同类型的对象复制成员值来初始化对象。成员中存在指针时，自动生成复制构造只会复制指针值，因此可能需要用户定义 *分配指针内存* 操作。复制构造函数的首元参数为 `T&`，可以具有 CV 限定；若包含其他参数，需要具有默认实参。
 
 ```cpp
 Point(Point& other);   				
@@ -3805,12 +3834,12 @@ int main() {
 
 析构函数在对象超出范围或通过调用 `delete` 显式销毁对象时自动调用。析构函数不可继承，如果基类将其析构函数声明为 `virtual`，则派生析构函数始终会重写它。这使得可以通过指向基类的指针删除多态类型的动态分配对象。
 
-纯虚析构函数强制类型为抽象类，需要提供纯虚析构函数的定义。虚析构函数主要用于确保多态场景下派生类对象的正确析构，避免内存泄漏和资源未释放的问题。当通过基类指针删除派生类对象时，虚析构函数确保调用派生类的析构函数再调用基类的析构函数；要求其继承链的最终基类必须是虚析构函数。
+纯虚析构函数强制类型为抽象类，但必须提供纯虚析构函数的定义。虚析构函数主要用于确保多态场景下派生类对象的正确析构，避免内存泄漏和资源未释放的问题。当通过基类指针删除派生类对象时，虚析构函数确保调用派生类的析构函数再调用基类的析构函数；要求其继承链的最终基类必须是虚析构函数。
 
 
 ```cpp
 struct BaseA {
-	virtual ~BaseA() { cout << "~BaseA\n"; }
+	virtual ~BaseA() = 0 { cout << "~BaseA\n"; }  // 纯虚析构函数，必须具有定义
 };
 struct BaseB : BaseA {
 	~BaseB() { cout << "~BaseB\n"; }
@@ -3834,15 +3863,15 @@ int main() {
 
 `default` 函数和 `delete` 函数可以显式控制是否自动生成特殊成员函数。`delete` 函数防止所有类型的函数（特殊成员函数和普通成员函数以及非成员函数）的自变量中出现有问题的类型提升，这可能会导致意外的函数调用。
 
-在 C++ 中，如果某个类型未声明它本身，则编译器将自动为该类型生成默认构造函数、复制构造函数、复制赋值运算符和析构函数、移动构造函数和移动赋值运算符。这些函数称为特殊成员函数，它们使 C++ 中的简单用户定义类型的行为如同 C 中的结构。其中：
-- 显式声明了任何构造函数，则不会自动生成默认构造函数。
-- 显式声明了虚拟析构函数，则不会自动生成默认析构函数。
-- 显式声明了移动构造函数或移动赋值运算符，则不自动生成复制构造函数和成复制赋值运算符。
-- 显式声明了复制构造函数、复制赋值运算符、移动构造函数、移动赋值运算符或析构函数，则不自动生成移动构造函数和移动赋值运算符。
-- 显式声明了复制构造函数或析构函数，则弃用复制赋值运算符的自动生成。
-- 显式声明了复制赋值运算符或析构函数，则弃用复制构造函数的自动生成。
+在 C++ 中，如果某个类型未声明它本身，则编译器将自动为该类型生成默认构造函数、复制构造函数、复制赋值运算符和析构函数、移动构造函数和移动赋值运算符。其中：
+- 显式声明了任何构造函数，则不生成默认构造函数。
+- 显式声明了虚析构函数，则不生成默认析构函数。
+- 显式声明了移动构造函数或移动赋值运算符，则不生成复制构造函数和复制赋值运算符。
+- 显式声明了复制构造函数、复制赋值运算符、移动构造函数、移动赋值运算符或析构函数，则不生成移动构造函数和移动赋值运算符。
+- 显式声明了复制构造函数或析构函数，则不生成复制赋值运算符。
+- 显式声明了复制赋值运算符或析构函数，则不生成复制构造函数。
 
-如果基类不拥有可派生类调用的默认构造函数，例如没有 `public` 或 `protected` 的默认构造函数，那么派生类无法自动生成它自己的默认构造函数。
+如果基类不拥有供派生类可访问（`public`，`protected`）的默认构造函数，那么派生类无法自动生成它自己的默认构造函数。
 
 对于创建不可移动、只能动态分配或无法动态分配的用户定义类型；可以通过 `default` 和 `delete` 方式进行设定。弃置声明复制构造函数和复制赋值运算符，可以使用户定义类型不可复制：
 
@@ -3855,9 +3884,9 @@ struct noncopyable
 };
 ```
 
-> *defualt* *特殊成员函数*
+> *defualt*
 
-可以默认设置任何特殊成员函数，以显式声明特殊成员函数使用默认实现、定义具有非公共访问限定符的特殊成员函数或恢复其他情况下被阻止其自动生成的特殊成员函数。通过对可内联的特殊成员函数设置为 `default` 而不是空函数体进行实现：
+`default` 预置任何特殊成员函数以默认方式自动实现。
 
 ```c++
 struct widget
@@ -3870,7 +3899,7 @@ inline widget& widget::operator=(const widget&) =default;
 
 > *delete*
 
-可以删除特殊成员函数和普通成员函数以及非成员函数，以阻止定义或调用它们。删除特殊成员函数，可以阻止编译器生成不需要的特殊成员函数。
+`delete` 弃置特殊成员函数和普通成员函数以及非成员函数，以阻止定义或调用它们。已删除的函数仍参与重载决策。
 
 ```c++
 struct widget
@@ -3885,22 +3914,11 @@ widget* pw = ::new widget;  // ok
 widget* pw = &w  // ERR; address-of 被删除
 ```
 
-删除普通成员函数或非成员函数可阻止有问题的类型提升导致调用意外函数。这可发挥作用的原因是，已删除的函数仍参与重载决策，并提供比提升类型之后可能调用的函数更好的匹配。函数调用将解析为更具体的但可删除的函数，并会导致编译器错误。
-
-```c++
-// deleted overload prevents call through type promotion of float to double from succeeding.
-void call_with_true_double_only(float) =delete;
-void call_with_true_double_only(double param) { return; }
-
-call_with_true_double_only(3.14f);  // err
-call_with_true_double_only(100);  // ok; int cast to double 
-```
-
 若要限制发生隐式类型转换，确保仅发生对 `double` 类型的参数进行调用，可声明一个模板的已删除版本：
 
 ```c++
 template < typename T >
-void call_with_true_double_only(T) =delete; //prevent call through type promotion of any T to double from succeeding.
+void call_with_true_double_only(T) = delete; //prevent call through type promotion of any T to double from succeeding.
 void call_with_true_double_only(double param) { return; } // also define for const double, double&, etc. as needed.
 
 call_with_true_double_only(3.1415);  // just only double
@@ -3909,14 +3927,14 @@ call_with_true_double_only(3.1415);  // just only double
 >---
 #### 13.4. 继承
 
-继承从现有类派生新类；可以是单一继承，或多重继承，`final` 声明无法被继承。同名签名不同的函数声明隐藏基类成员。	
+继承从现有类派生新类；可以是单一继承，或多重继承，`final` 声明封装。同名成员（非重写）隐藏继承的成员。	
 
 ```c++
 class Derived : Base-Class, ... ;
 Base-Class = [virtual] [access-specifier] BaseClass
 ```
 
-在多重继承中，可以构建一个继承关系图，其中相同的基类是多个派生类的一部分。多重继承使得沿多个路径继承名称成为可能。沿这些路径的类成员名称不一定是唯一的。由于一个类可能多次成为派生类的间接基类，这些名称冲突存在 “多义性”。任何引用类成员的表达式必须采用明确的引用，可以通过限定名称及其类名消除多义性。
+在多重继承中，可以构建一个继承关系图，其中相同的基类是多个派生类的一部分。多重继承使得沿多个路径继承名称成为可能。沿这些路径的类成员名称不一定是唯一的。由于一个类可能多次成为派生类的间接基类，这些名称冲突存在 “多义性”。任何引用类成员的表达式必须采用明确的引用，可以通过限定名称方式消除多义性。
 
 ```c++
 struct A {
@@ -3933,11 +3951,11 @@ class C : public A, public B {};
 int main(){
     C *pc = new C;
     pc->b();     // b 不明确
-    pb->B::b();  // ok
+    pb->B::b();  // ok，限定名称访问
 }
 ```
 
-通过一个继承关系图到达多个名称（函数、对象或枚举器）是可能的。这种情况被视为与非虚拟基类一起使用时目的不明确，从派生类型指针或引用转换到基类指针或引用的显式或隐式转换可能会导致多义性。 
+通过一个继承关系图到达多个名称（函数、对象或枚举器）是可能的。这种情况被视为与非虚拟基类一起使用时目的不明确，从派生类型指针或引用转换到基类指针或引用的转换可能会导致歧义。 
 
 ```c++
 class A { };
@@ -3961,7 +3979,7 @@ class D : public B, public C {};
 A* pa = new D; 
 ```
 
-虚函数可以在派生类中重新定义（`override` 和 `virtual` 重写时可选），纯虚函数强制类型为抽象类型。更改重写函数的访问限定不会影响多态行为。`consteval` 虚函数不得重写非 `consteval` 虚函数，也不得被其重写。使用限定函数标识（`Base::VirFunc`）调用基类虚函数。
+虚函数可以在派生类中覆写（`override` 和 `virtual` 可选），纯虚函数（`=0`）强制类型为抽象类型。更改重写函数的访问限定不会影响多态行为。`consteval` 虚函数不得重写非 `consteval` 虚函数，也不得被其重写。使用限定函数标识（`Base::VirFunc`）调用基类虚函数。
 
 ```c++
 struct Account {
@@ -3993,7 +4011,7 @@ int main() {
 }
 ```
 
-可以提供纯虚函数的定义（纯虚析构函数必须提供），除纯虚析构函数外，其他纯虚函数的定义必须在类外部提供，派生类的成员函数可以自由地使用限定函数标识调用抽象基类的纯虚函数。
+可以提供纯虚函数的定义（纯虚析构函数必须提供），除纯虚析构函数外，其他纯虚函数在外部定义。
 
 ```cpp
 struct Abstract {
@@ -4019,32 +4037,7 @@ struct Concrete : Abstract {
 };
 ```
 
-
-如果使用限定名查找选择函数（即，如果函数名称出现在作用域解析运算符 :: 的右侧），则会抑制虚函数调用。
-
-```cpp
-struct Base {
-	virtual void f() { std::cout << "base\n"; }
-};
-struct Derived : Base {
-	void f() override { std::cout << "derived\n"; }
-};
-int main()
-{
-	Base b;
-	Derived d;
-	// virtual function call through reference
-	Base& br = b; // the type of br is Base&
-	Base& dr = d; // the type of dr is Base& as well
-	br.f(); // prints "base"
-	dr.f(); // prints "derived"
-	// non-virtual function call
-	br.Base::f(); // prints "base"
-	dr.Base::f(); // prints "base"
-}
-```
-
-函数 `Derived::f` 重写了函数 `Base::f`，它们的返回类型必须相同或为协变的。
+函数 `Derived::f` 重写了函数 `Base::f`，它们的返回类型必须相同或是协变的。
 
 ```cpp
 struct Base {
@@ -4070,7 +4063,7 @@ int main() {
 >---
 #### 13.5. 友元声明
 
-友元声明出现在类体中，并授予函数或另一个类访问声明友元声明的类的私有和受保护成员的权限。友元函数非成员函数并导出到封闭非类范围。友元关系不具有继承和传递性。访问说明符对友元声明的含义没有影响，友元类声明不能定义新类（例如 `friend class X {};` 是错误的）
+友元声明出现在类体中，并授予函数或另一个类访问声明友元的类内部成员的权限。非成员友元函数导出到声明友元的类外部范围。友元关系不具有继承和传递性。友元声明不受访问限定符的影响，友元类声明不能定义新类（例如 `friend class X {};`）。
 
 ```cpp
 class Product {
@@ -4122,7 +4115,7 @@ cout << r << endl;				// 2
 >---
 #### 13.7. 联合体
 
-联合体隐式密封无基类，对象仅能保存其非静态数据成员中的一个，不包含引用类型非静态数据成员，可以包含位域。成员默认 `public`。联合体的大小至少与容纳其最大的数据成员所需的大小相同。最多一个变体成员可以具有默认初始化器。
+联合体隐式密封，对象仅保存其非静态数据成员中的一个，不包含引用类型非静态数据成员，可以包含位域。成员默认 `public`。联合体的大小至少与最大的数据成员大小相同，最多一个成员可以具有默认初始化器。
 
 ```cpp
 union U {
@@ -4133,7 +4126,7 @@ union U {
 };
 ```
 
-联合具有非静态类类型成员时，编译器自动将非用户提供的任何特殊成员函数标记为 `delete`。如果联合是 `class` 或 `struct` 中的匿名联合，则 `class` 或 `struct` 的非用户提供的任何特殊成员函数都会被标记为 `delete`。如果联合体的成员是具有用户定义构造函数和析构函数的类，当切换活动成员时，通常需要显式析构函数和 *placement new*。
+联合具有非静态类类型成员时，编译器自动将非用户提供的任何特殊成员函数标记为 `delete`。如果联合是 `class` 或 `struct` 中的匿名联合，则 `class` 或 `struct` 的非用户提供的任何特殊成员函数都会被标记为 `delete`。如果联合体的成员是具有用户定义构造函数和析构函数的类，当切换活动成员时，通常需要显式调用析构函数和 *new* 初始化。
 
 ```cpp
 union S {
@@ -4179,7 +4172,7 @@ struct Input {
 ---
 ### 14. 模板
 
-模板可以定义类模板、函数模板、别名模板、变量模板、概念约束等实体，以若干的 *模板参数*（类型、常量或其他模板）参数化。通过提供具体模板实参以特化，特化支持显式提供：对类、函数、变量模板全特化，或对类和变量模板部分特化。模板声明可以包含约束。变量模板在类型中仅支持静态。别名模版始终不进行推导。
+模板可以定义类模板、函数模板、别名模板、变量模板、概念约束等实体，以若干的 *模板参数*（类型、常量或其他模板）参数化。通过提供具体模板实参以特化，特化支持显式提供：对类、函数、变量模板全特化，或对类和变量模板部分特化。模板声明可以包含约束。变量模板在类型中声明时仅支持静态。别名模版始终不进行推导。
 
 ```cpp
 // 类模板
@@ -4241,11 +4234,11 @@ void g(X x, Y y, U auto z);      // template<class X, T Y, U Z> void g(X x, Y y,
     <Typeid [name] [= Val]>      // 默认值
     <Typeid ... [name]>          // 常量形参包
 // 类型模板形参
-    <class | typename | ConceptName [name] [= Val]> 
-    <class | typename | ConceptName ... [name]>   // 模板形参包
+    <class|typename|ConceptName [name] [= Val]> 
+    <class|typename|ConceptName ... [name]>   // 模板形参包
 // 模板模板形参
-    <template <Params> class | typename [name] [= Val]>
-    <template <Params> class | typename ... [name]>
+    <template <Params> class|typename [name] [= Val]>
+    <template <Params> class|typename ... [name]>
 ```
 
 `Typeid` 可以是 *结构化类型*、包含占位符的类型、被推导类类型的占位符。
@@ -4331,9 +4324,10 @@ void func(Ts... args)
 
 ```cpp
 template<class... Mixins>
-class X : public Mixins... {
+class X : public Mixins... {  // public B1, public B2,...
 public:
     X(const Mixins&... mixins) : Mixins(mixins)... {}  // 同时需要在构造函数中使用包展开
+	// X(const B1& b1, const B2& b2,...) : B1(b1),B2(b2),... {}
 };
 ```
 
@@ -4368,7 +4362,7 @@ bool b = all(true, true, true, false);
 >---
 #### 14.2. 模板实例化
 
-模板的某个特定类型尚未被显式实例化时，由编译器隐式实例化。显式实例化定义强制实例化其所指代的模板类型，要求在此之前必须存在它的模板定义。显式实例化声明（`extern`）跳过隐式实例化步骤，表明该模板已在别处显式实例化定义。若同一组模板实参的显式特化在显式实例化定义之前出现，则该显式实例化无效（反之定义在特化之前声明，程序非良构）。
+模板的某个特定类型尚未被显式实例化时，由编译器隐式实例化。显式实例化定义强制实例化其所指代的模板类型，要求在此之前必须存在它的模板定义。显式实例化声明（`extern`）跳过隐式实例化步骤，表明该模板已在别处显式定义。若同一组模板实参的显式特化在显式实例化定义之前出现，则该显式实例化无效（反之定义在特化之前声明，程序非良构）。
 
 ```cpp
 /* fileA.cpp */
@@ -4378,14 +4372,14 @@ void Func(T v) { std::cout << v << std::endl; };   // 模板定义
 template<> void Func<bool>(bool v) {     // Func<bool> 显式特化
 	std::cout << std::boolalpha << v << std::endl;
 };
-template void Func<bool>(bool v);            // 无效显式实例化定义
+template void Func<bool>(bool v);            // 已存在显式特化，显式实例化定义无效
 template void Func<double>(double v);        // Func<double> 显式实例化定义
 //template<> void Func<double>(double v) {}  // err 显式特化之前已有显式定义
 
 /* fileB.cpp */
 extern template void Func<bool>(bool);       // 引用外部显式特化定义
 extern template void Func<double>(double);   // 引用外部显式实例化定义
-extern template void Func<string>(string);   // 无效显式实例化引用声明，无显式实例化定义
+extern template void Func<string>(string);   // 无效引用，未显式定义或特化
 int main() {
 	Func<int>(10086);    // 隐式实例化
 	Func<double>(3.14);
@@ -4472,6 +4466,8 @@ int main() {
 }
 ```
 
+> *未知特化待决*
+
 在模板定义内，某些名称被推导为属于某个未知特化，特别是，
 - 在 :: 左侧出现了并非当前实例化成员的待决类型的名字的限定名。
 - 限定符是当前实例化，且无法在当前实例化或它的任何非待决基类中找到，并存在待决基类的限定名。
@@ -4532,7 +4528,7 @@ int main() {
 ```
 
 >---
-#### 14.4. 用户定义模板推导
+#### 14.4. 类模板推导指引
 
 以尾随函数形式声明类类型模板的用户推导指引，不适用 `auto` 占位推断：
 
@@ -4587,7 +4583,12 @@ int f(typename T::B*);
 template<class T>
 int f(T);
 
-int i = f<int>(0); // 使用第二个重载
+struct S { struct B {}; };
+int main() {
+
+    int i = f<int>(0);       // 使用第二个重载
+    int i2 = f<S>(new S::B); // 使用第一个重载
+}
 ```
 
 >---
@@ -4667,7 +4668,7 @@ concept C = requires(T t)
 	typename S<T>;     // 需要类模板特化
 	typename Ref<T>;   // 需要别名模板替换
 };
-
+// =================================================
 template<class T, class U>
 using CommonType = std::common_type_t<T, U>;
 template<class T, class U>
@@ -4703,14 +4704,14 @@ concept C = requires(T x)
 	// 并且 它的结果必须可以转换为 T
 	{ x * 1 } -> std::convertible_to<T>;
 };
+// =============================================
 template <C T> T::inner F(T& t) { return *t; }
-
 struct Sample {
 	int value;
-	typedef Sample* inner;
-	inner operator* () { return this; }
-	int operator +(int v) noexcept { return value += v; }
-	Sample operator *(int v) { return (this->value *= v, *this); }
+	typedef Sample* inner;		// T::inner
+	inner operator* () { return this; }  // *T >> inner
+	int operator +(int v) noexcept { return value += v; }	// x+1
+	Sample operator *(int v) { return (this->value *= v, *this); }   // x*1
 };
 int main() {
 	Sample s{};
@@ -4733,7 +4734,7 @@ concept Same = requires() {
 	std::same_as<T, U>;
 };
 template<class T>
-concept Semiregular = Addable<T> &&
+concept Semiregular = Addable<T> &&   // 联结
 requires(T a, std::size_t n) {
 	requires Same<T*, decltype(&a)>;       // 嵌套："Same<...> 求值为 true"
 	{ a.~T() } noexcept;                   // 复合："a.~T()" 是不会抛出的合法表达式
@@ -4867,7 +4868,7 @@ int main() {
 >---
 #### 15.2. 未处理的异常
 
-如果无法找到当前异常的匹配处理程序（或 `catch(...)` 处理程序），则调用预定义的 `terminate` 运行时函数（默认操作是 `abort()`）。可以在程序的任何点调用 `set_terminate()`。`terminate` 总是调用最后一次指定给 `set_terminate` 参数。
+如果无法找到当前异常的匹配处理程序（或 `catch(...)` 处理程序），则调用预定义的 `std::terminate()` 运行时函数（默认操作是 `abort()`）。可以在程序的任何点调用 `set_terminate()`。`terminate` 总是调用最后一次指定给 `set_terminate` 参数。
 
 最好在 `set_terminate` 的 `terminate_handler` 处理程序中调用 `exit` 来终止程序或当前线程，否则返回调用方调用 `abort`。
 
@@ -4898,11 +4899,11 @@ function try {
 } catch ( /*...*/ ) {
     // 处理异常
 } 
-constructor try [: initer-list ] 
+constructor try [: init-list ] 
 { ... } catch { ... } 
 ```
 
-函数 `try` 块是一类特殊的函数体。若 `try` 块或构造函数初始化器抛出异常，则在函数 `try` 块后的 `catch` 处理块中处理异常。对于构造函数或析构函数 `try` 块，始终默认重新抛出异常；在这类函数 `try` 块中涉及该对象的非静态成员或基类会导致未定义行为。
+函数 `try` 块是一类特殊的函数体。若 `try` 块或构造函数初始化器抛出异常，则在函数 `try` 块后的 `catch` 处理块中处理异常。对于构造函数或析构函数 `try` 块，始终默认重新抛出异常；在这类函数 `try` 块中操作涉及该对象的非静态成员或基类会导致未定义行为。
 
 ```cpp
 struct Sample {
@@ -4925,6 +4926,7 @@ int main(int, const char* argv[]) try
 catch (int v) {
 	return v;  // 10086
 }
+// catch unknown exception
 ```
 
 >---

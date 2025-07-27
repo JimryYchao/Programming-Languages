@@ -17,6 +17,6 @@ int main(void){
 
 - [CPP reference](https://zh.cppreference.com/)
 - [Runebook.dev](https://runebook.dev/en/docs/c/-index-)
-- [ISO_IEC_9899_2024](./C%20SLib/BS_ISO_IEC_9899_2024.pdf)
+- [ISO_IEC_9899_2024](./C%20STD/BS_ISO_IEC_9899_2024.pdf)
 
 ---
