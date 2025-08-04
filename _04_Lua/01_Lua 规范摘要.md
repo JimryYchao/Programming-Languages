@@ -45,7 +45,7 @@ _ENV = newgt
 print(a, _G.a)  -- 1    1
 a = 10
 _G.a = 20
-print(a, _G.a)  -- 10   20
+print(_ENV.a, _G.a)  -- 10   20 
 ```
 
 当加载另一个模块时，被加载模块的全局变量会自动进入当前环境。可以利用 `_ENV` 的定界特性，将模块进行分离：
@@ -103,7 +103,7 @@ package.cpath = [[.\"?.dll;C:\Program Files\Lua504\dll\?.dll]]
 > *构建模块*
 
 ```lua
--- Mod.lua : 创建一个模块的一般方法
+-- Mod.lua : 创建一个模块的常用形式
 local M = {}
 M.Add = function(c1, c2) end
 M.Sub = function(c1, c2) end
@@ -143,7 +143,7 @@ assert(loadfile("name.lc"))()
 >---
 #### 错误处理
 
-错误将中断程序正常流程。可以调用 `error(mess, level)` 显式抛出错误并沿着堆栈进行传播；`assert(exp, mess)` 执行断言并在 `exp` 为 `false` 或 `nil` 时抛出错误；函数 `pcall(func, args...)` 和 `xpcall(func, handle, args...)` 用于捕获错误，常用 `debug.debug` 和 `debug.traceback` 作为 `xpcall` 的消息处理函数。函数 `warn` 用于生成一条警告消息。
+错误将中断程序正常流程。可以调用 `error(mess, level)` 显式抛出错误并沿着堆栈进行传播；`assert(exp, mess)` 执行断言并在 `exp` 为 `false` 或 `nil` 时抛出错误；安全调用函数 `pcall(func, args...)` 和 `xpcall(func, handle, args...)` 用于捕获错误，常用 `debug.debug` 和 `debug.traceback` 作为 `xpcall` 的消息处理函数。函数 `warn` 用于生成一条警告消息。
 
 ```lua
 function panic(msg)
@@ -199,12 +199,12 @@ end                    -- 语句块结束
 ---
 ### 类型与声明
 
-Lua 中有 8 个基本类型分别为：nil（空）、boolean（布尔）、number（数值）、string（字符串）、userdata（用户数据）、function（函数）、thread（线程） 和 table（表）。
+Lua 中有 8 个基本类型分别为：*nil*（空）、*boolean*（布尔）、*number*（数值）、*string*（字符串）、*userdata*（用户数据）、*function*（函数）、*thread*（线程） 和 *table*（表）。
 
 简单值类型包含 *nil*，*boolean*，*number*，*string*。`local` 限定局部变量：
 - 未定义变量值为 `nil`。`nil` 可用于将某个不再使用的变量或 *table* 的键置空，Lua 会自动回收该变量。
 - `false` 和 `nil` 的布尔条件测试返回假，其他值返回真。
-- 数值类型内置整数和浮点数，算数值相同的整数和浮点数被视为相等，`math.type(n)` 返回数值内部类型；浮点数支持 E 和 P 计数法。    
+- 数值类型内置整数和浮点数，真值相同的整数和浮点数被视为相等，`math.type(n)` 返回数值内部类型；浮点数支持 E 和 P 计数法。    
 
 
 ```lua
@@ -216,11 +216,15 @@ type(io.stdin)  --> userdata
 type(print)     --> function
 type({})        --> table
 type(type(X))   --> string
+math.type(3)    --> integer
+math.type(3.14) --> float
+type(coroutine.create(type))   --> thread
+type(coroutine.wrap(type))     --> function
 ```
 
 > *浮点型与整型之间的转换*
 
-算数值相等的整数和浮点数之间可以互相转换：整数加 0.0 转换为浮点数；浮点数与 0 按位或运算转换为整数。
+算数值相等的整数和浮点数之间可以互相转换：整数加 0.0 转换为浮点数；浮点数（小数部分为 0）与 0 按位或运算转换为整数。
 
 ```lua
 12345 + 0.0    --> 12345.0
@@ -234,7 +238,7 @@ type(type(X))   --> string
 
 > 局部变量与常量属性
 
-`local` 声明与块范围关联的局部变量，局部变量无法通过 `_ENV.var` 访问，但可以作为模块的返回值；`<const>` 为局部变量赋予常量属性。
+`local` 声明与块范围关联的局部变量，局部变量无法通过 `_ENV` 访问，但可以作为模块的返回值；`<const>` 为局部变量赋予常量属性。
 
 ```lua
 local m = {}
@@ -289,7 +293,7 @@ second line
 >---
 #### table
 
-表（table）是 Lua 中唯一的数据结构机制，可以用来表示数组、列表、符号表、集合、记录、图形、树等数据结构。Lua 使用 `_G` 表用来存储全局变量。键可以是除 `nil` 和 `NaN` 外的任何值，值为 `nil` 任何键都不被视为表的一部分。
+表（table）是 Lua 中唯一的数据结构机制，可以用来表示数组、列表、符号表、集合、记录、图形、树等数据结构。Lua 使用 `_G` 表用来存储全局变量。键可以是除 `nil` 和 `NaN` 外的任何值，值为 `nil` 任何键都不被视为表的一部分，`t.key = nil` 可以作为删除一组键值对的方式。
 
 ```lua
 t1 = {
@@ -309,7 +313,6 @@ a.__index = a
 ```lua
 day = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
 -- 索引从 1 开始为每个列表元素建立索引关联
-
 print(day[4])	--> Wednesday
 ```
 
@@ -420,7 +423,7 @@ t:Traverse()	-- 传递自身作为首位参数到表函数中
 ```lua
 function T:Traverse()
 -- 等价于
-function T:Traverse(self)
+function T.Traverse(self)
 ```
 
 >---
@@ -466,7 +469,7 @@ print("resume:" , coroutine.resume(co, "hello"))
 
 `coroutine.wrap(f)` 返回一个 `function` 类型的协程，和 `create(co)` 构造的 `thread` 区别在于，`coroutine.yield` 或协程结束返回时，不会返回函数是否正常运行或恢复运行的状态，也无法获得 `function` 协程的状态。
 
-`thread` 协程的主函数发生错误时不会终止程序，会将错误发送到 `resume` 的返回中；而 `function` 协程直接将导致程序错误
+`thread` 协程的主函数发生错误时不会终止程序，会将错误发送到 `resume` 的返回中；而 `function` 协程直接将导致程序错误。
 
 ```lua
 local co = coroutine.create(f)
@@ -517,7 +520,7 @@ end
 
 > *coroutine.running*
 
-函数 `coroutine.running(co)` 返回正在运行的协程和一个 *boolean* 值，当正在运行的协程是主函数 `main` 时返回 `true`。
+函数 `coroutine.running()` 返回正在运行的协程和一个 *boolean* 值，当正在运行的协程是主函数 `main` 时返回 `true`。
 
 ```lua
 print(coroutine.running())
@@ -607,14 +610,14 @@ end
 | Category   | Operators                                                |
 | :--------- | :------------------------------------------------------- |
 | 幂运算     | `x ^ y`                                                  |
-| 一元       | `-x` `#string` `#table` `not x` `~x`                     |
-| 乘法       | `x * y` `x / y`(浮点除法) `x // y`(向下取整除法) `x % y` |
-| 加法       | `x + y` `x - y`                                          |
+| 一元       | `-x`, `#string`, `#table`, `not x`, `~x`                     |
+| 乘法       | `x * y`, `x / y`(浮点除法), `x // y`(向下取整除法), `x % y` |
+| 加法       | `x + y`, `x - y`                                          |
 | 字符串拼接 | `x .. y`                                                 |
-| 移位       | `x << y` `x >> y`                                        |
-| 按位       | `x & y` `x ~ y`(异或) `x \| y`                           |
-| 关系       | `x < y` `x > y` `x <= y` `x >= y` `x == y` `x ~= y`      |
-| 逻辑       | `x and y` `x or y`                                       |
+| 移位       | `x << y`, `x >> y`                                        |
+| 按位       | `x & y`, `x ~ y`(异或), `x \| y`                           |
+| 关系       | `x < y`, `x > y`, `x <= y`, `x >= y`, `x == y`, `x ~= y`      |
+| 逻辑       | `x and y`, `x or y`                                       |
 | 赋值       | `x = y`                                                  |
 
 
@@ -665,7 +668,7 @@ X and Y or Z
 11101110 >> 2 = 01111011  --> -18>>2 = 123 (逻辑移位)
 ```
 
-利用 floor 除法模拟实现算术移位，公式为 `num // (2^n)|0`，当 $n>0$ 表示算术右移；当 $n<0$ 表示算术左移。
+利用 floor 除法模拟（`num // (2^n)|0`）实现算术移位：当 n>0 表示算术右移；当 n<0 表示算术左移。
 
 ```lua
 -- 负数的算术右移
@@ -677,6 +680,17 @@ X and Y or Z
 ---
 ### 语句
 
+#### 代码块：do-end
+
+`do end` 可以在文件或函数域出现
+
+```lua
+do
+    <code>
+end
+```
+
+>---
 ####  条件控制：if
 
 `false` 和 `nil` 值为假，`true` 和非 `nil` 任意值为真。
@@ -729,8 +743,8 @@ end
 do
     local _f, _s, _var = explist   -- 返回一个迭代函数，不可变状态，控制变量初始值
     while true do
-        local var_1, ... var_n = _f(_s, _var)
-        _var = _var_1
+        local var_1, ..., var_n = _f(_s, _var)
+        _var = var_1
         if _var == nil then break end
         <body>
     end
@@ -745,6 +759,16 @@ function func(maxCount,value) 
 end
 for i,v in func,5,0 do
     print(i,v)
+end
+-- 相当于
+do
+    local _f, _s, _var = func, 5, 0
+    while true do
+        local i, v = _f(_s, _var)
+        _var = i
+        if _var == nil then break end
+        print(i, v)
+    end
 end
 ```
 
@@ -797,21 +821,10 @@ end
 return 0   -- 文件范围返回值
 ```
 
->---
-#### 代码块：do-end
-
-`do end` 可以在文件或函数域出现
-
-```lua
-do
-    <code>
-end
-```
-
 ---
 ### 元表与元方法
 
-元表定义了其原始值允许的某些操作，可以设置元表中特定元方法的字段来更改值行为。`getmetatable(t)` 获取父级元表。`rawget` 访问查询元表中的元方法。`setmetatable(t, metatable)` 替换表的元表，`metatable` 为 `nil` 时，表示删除 `t` 的元表。*table* 和 *full userdata* 具有单独的元表，除字符串外其他的值类型默认没有元表。
+元表定义了其原始值允许的某些操作，可以设置元表中特定元方法的字段来更改值行为。`getmetatable(t)` 获取父级元表。`setmetatable(t, metatable)` 替换表的元表，`metatable` 为 `nil` 时，表示删除 `t` 的元表。*table* 和 *full userdata* 具有单独的元表，除字符串外其他的值类型默认没有元表。
 
 ```lua
 local subTable, father = {}, {}
@@ -851,8 +864,8 @@ __call      -- func(args)
 __tostring  -- tostring 调用
 __name      -- tostring 替选调用 
 __gc        -- 终结器
-__close     -- 待关闭变量
-__mode      -- 弱表模式
+__close     -- 待关闭变量 <close>
+__mode      -- 弱表模式 "k","v","kv"
 __metatable -- 元表
 __pairs     -- 在 for-pairs 替选调用
 ```
@@ -1063,7 +1076,7 @@ print(b.key)      -- nil
 函数 `setmetatable` 和 `getmetatable` 用到了元方法，用于保护元表。假设要保护集合，即使用户既看不到也不能修改集合的元表，可以在元表中设置 `__metatable` 字段，那么 `getmetatable` 会返回这个字段，`setmetatable` 会引发一个错误。
 
 ```lua
-local mt = { __metatable = 0}
+local mt = { __metatable = 0 }
 local t = setmetatable({}, mt)  -- 限制 t 受保护
 print(getmetatable(t))          -- mt.__metatable = 0
 local ok, err = pcall(setmetatable, t, {})
@@ -1113,7 +1126,7 @@ print(test.telephone)
 ---
 ### 面向对象编程
 
-使用参数 `self` 是所有面向对象语言的核心点。避免使用全局变量进行操作，把操作限定给特定对象工作。可以利用表的与值无关的 `self` 表示作为操作的接受者，来避免将操作仅限定在特定的全局变量中才能工作。
+使用参数 `self` 是 Lua 面向对象语言的核心点。避免使用全局变量进行操作，把操作限定给特定对象工作。可以利用表的与值无关的 `self` 表示作为操作的接受者，来避免将操作仅限定在特定的全局变量中才能工作。
 
 ```lua
 function t.foo(self, arg)    -- self 声明
@@ -1152,22 +1165,20 @@ p.FuncB()
 利用 `__index` 和 `self` 机制可以用来实现继承。
 
 ```lua
-local metaclass = {}
----Create an object from metaclass
-function metaclass:new(o)
+local prototype = {}
+---Create an obj from prototype
+function prototype:new(o)
     o = o or {}
     self.__index = self
     setmetatable(o, self)
-    o.base = self			-- 关联超类
+    o.base = self   -- 关联超类
     return o
 end
 
-local o1 = metaclass:new()
-o1.key1 = "hello"
+local o1 = prototype:new()
+o1.hello = "world"
 local o2 = o1:new()	-- 单一继承
-print(o2.key1)	-- hello
-metaclass.key2 = 1
-print(o2.key2)	-- 1
+print(o2.hello)	    -- world
 ```
 
 > 多重继承
@@ -1294,12 +1305,12 @@ Lua 执行自动内存管理，通过运行一个垃圾收集器来收集所有�
 
 Lua5.1 使用了增量式垃圾收集器，也会像标记清除式一样执行相同的步骤。不同的是，增量式不需要在垃圾收集期间停止主程序的运行。增量式与解释器一起交替运行，解释器可能会改变一个对象的可达性，为了保证收集的正确性，垃圾收集器中的有些操作具有发现危险改动和纠正涉及对象标记的内存屏障。
 
-Lua5.2 引入了紧急垃圾收集。当内存分配失败时，Lua 会强制进行一次完整的垃圾收集，并再次尝试分配。这些紧急情况可以发生在 Lua 进行内存分配的任意时刻，包括 Lua 处于不一致的代码执行状态时。这类型的垃圾收集动作不能运行析构器。
+Lua5.2 引入了紧急垃圾收集。当内存分配失败时，Lua 会强制进行一次完整的垃圾收集，并再次尝试分配。这些紧急情况可以发生在 Lua 进行内存分配的任意时刻，包括 Lua 处于不一致的代码执行状态时。这类垃圾收集动作不能运行析构器。
 
 在 Lua5.4 之后，GC 可以在两种模式下工作，增量式或分代式。
 - 增量模式：每个 GC 周期以小步骤执行标记、扫描和收集，并与程序的执行交替运行，收集器可以通过参数周期 *pause*（通过 `setpause`）、步长倍率 *stepmul*（通过 `setstepmul`）、步长 *stepsize*（通过 `step`）进行控制。
 
-- 分代模式：收集器经常进行次要收集，只遍历最近创建的对象，若小收集之后内存的使用仍高于限制，收集器将执行大收集（遍历所有对象）。代入模式使用两个参数，次要收集频率和主要收集频率
+- 分代模式：收集器经常进行次要收集，只遍历最近创建的对象，若小收集之后内存的使用仍高于限制，收集器将执行大收集（遍历所有对象）。代入模式使用两个参数，次要收集频率和主要收集频率。
   - 对于次要收集频率 x，在前一个主要收集后，当内存增长到比正在使用的内存大 x%，将执行次要收集。默认值为 20，最大值为 200
   - 对于主要收集频率 y，在前一个主要收集后，当内存增长到比使用的内存大 y% 时，将执行主要收集。默认值为 100（超过上一次收集后使用量的两倍），最大值为 1000
 
@@ -1542,6 +1553,7 @@ debug.sethook(print,"l")
 反射的一个常见用法是用于调优，即程序使用资源的行为分析。对于时间相关的调优最好使用 C 接口。开发一个性能调优工具来列出程序执行的每个函数的调用次数：
 
 ```lua
+-- profiler.lua
 local Counters = {}
 local Names    = {}
 
@@ -1574,9 +1586,14 @@ end
 function Main()             -- 主函数
     print("This is Main function...")
 end
+function funcA() end
 
 debug.sethook(hook, "c")    -- 设置 call 事件的钩子
 Main()                      -- 运行主程序
+for i = 1, 10 do
+    funcA();
+end
+
 debug.sethook()             -- 关闭钩子
 
 for func, count in pairs(Counters) do
@@ -1584,10 +1601,10 @@ for func, count in pairs(Counters) do
 end
 
 --[[
-    This is Main function...
-    print   1
-    [d:\_Lua_\profiler.lua]:30 (Main)       1
     sethook 1
+    print   1
+    [profiler.lua]:31 (Main)    1
+    [profiler.lua]:34 (funcA)   10
 ]]
 ```
 
@@ -1679,23 +1696,6 @@ print(string.format("%s %d", "foo", 1))
 
 ---
 ### 附录
-
-#### Lua STD
-
-| STD                                                | Description          | Example |
-| :------------------------------------------------- | :------------------- | :------ |
-| [basic](./Lua%20LIB/api_lua/basic_ref.lua)         | 基础库函数           | [[↗]](./Lua%20LIB/api_lua/example/basic_example.lua)
-| [coroutine](./Lua%20LIB/api_lua/coroutine_ref.lua) | 协程支持             | [[↗]](./Lua%20LIB/api_lua/example/coroutine_example.lua)
-| [debug](./Lua%20LIB/api_lua/debug_ref.lua)         | 调试支持             | [[↗]](./Lua%20LIB/api_lua/example/debug_example.lua)
-| [io](./Lua%20LIB/api_lua/io_ref.lua)               | 输入与输出           | [[↗]](./Lua%20LIB/api_lua/example/io_example.lua)
-| [math](./Lua%20LIB/api_lua/math_ref.lua)           | 数学库               | [[↗]](./Lua%20LIB/api_lua/example/math_example.lua)
-| [os](./Lua%20LIB/api_lua/os_ref.lua)               | 系统支持             | [[↗]](./Lua%20LIB/api_lua/example/os_example.lua)
-| [package](./Lua%20LIB/api_lua/package_ref.lua)     | 模块加载支持         | [[↗]](./Lua%20LIB/api_lua/example/package_example.lua)
-| [string](./Lua%20LIB/api_lua/string_ref.lua)       | 字符串工具与模式匹配 | [[↗]](./Lua%20LIB/api_lua/example/string_example.lua)
-| [table](./Lua%20LIB/api_lua/table_ref.lua)         | *table* 操作支持     | [[↗]](./Lua%20LIB/api_lua/example/table_example.lua)
-| [utf8](./Lua%20LIB/api_lua/utf8_ref.lua)           | UTF-8 编码支持       | [[↗]](./Lua%20LIB/api_lua/example/utf8_example.lua)
-
->---
 
 #### 格式化输出
 
