@@ -2,7 +2,10 @@ __others
 
 _REF_
 _TMP_
-.vs
+[rR]elease
+[dD]ebug
+
+test
 
 
 # C EXE
@@ -13,6 +16,7 @@ _TMP_
 *.tar.xz
 
 .vscode
+.vs
 
 # C test scripts
 [Tt]estSrc/
@@ -21,3 +25,4 @@ clib-test/
 TODO
 TODO.md
 .idea/
+
