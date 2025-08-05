@@ -4,7 +4,7 @@
 
 C API 用于读写 Lua 全局变量、调用 Lua 函数、运行 Lua 代码段、注册 C 函数等。Lua 标准库将所有状态保存在动态结构体 `lua_State`。
 
-Lua 和 C 通过虚拟栈 stack 通信和数据交换。常见的栈操作：
+Lua 和 C 通过虚拟栈 stack 进行通信和数据交换。常见的栈操作：
 - 压入元素 `lua_push*`。`lua_checkstack` 检查栈空闲空间；栈中元素按先后压入顺序从 1 开始索引，-1 表示栈顶元素。
 - 查询元素 `lua_is*`。这类函数检查栈中某个元素是否可以转换为特定类型。`lua_type` 返回栈中元素的类型例如 `LUA_TNIL`、`LUA_TBOOLEAN`、`LUA_TNUMBER`、`LUA_TSTRING` 等。
 - 获取元素 `lua_to*`。转换失败不会提示类型错误，`lua_tolstring` 和 `lua_tothread` 返回 `NULL`。
@@ -17,21 +17,20 @@ Lua 和 C 通过虚拟栈 stack 通信和数据交换。常见的栈操作：
 #include "lauxlib.h"            // CAPI 辅助库函数
 #include "lualib.h"             // Lua 标准库函数
 
-int DoLuaBuff(char * buf, int bufsz)
+int DoLuaString(const char *buf)
 {
-    int error;
     lua_State *L = luaL_newstate();    // 创建一个 Lua 状态机
     luaL_openlibs(L);                  // 加载标准库
-    while(fgets(buf, sizeof(bufsz), stdin) != NULL){
-        error = luaL_loadstring(L,buf) || lua_pcall(L,0,0,0);   // 发生错误时将信息压入栈中
-        if (error){
-            fprintf_s(stderr, "%s\n", lua_tostring(L,-1));      // 获取错误信息
-            lua_pop(L,1);              // 从 lua state 栈中弹出错误信息
-        }
-    }
+    int err = luaL_loadstring(L, buf) || lua_pcall(L,0,0,0);   // 发生错误时将信息压入栈中
+    if (err){
+    	fprintf_s(stderr, "%s\n", lua_tostring(L,-1));      // 获取错误信息
+        lua_pop(L,1);              // 从 lua state 栈中弹出错误信息
+	}
     lua_close(L);
     return 0;
 }
+// do load string
+DoLuaString("print 'Hello World'");
 ``` 
 
 > *栈操作*
@@ -68,7 +67,7 @@ void StackDump(lua_State *L)
 
 > *错误处理*
 
-Lua 使用异常提示错误，C API 使用 `setjmp` 和 `longjmp` 模拟异常处理机制。也可以运行 `lua_pcall` 在保护模式中运行 C 代码。`lua_error` 或 `luaL_error` 
+Lua 使用异常提示错误，C API 使用 `setjmp` 和 `longjmp` 模拟异常处理机制。也可以运行 `lua_pcall` 在保护模式中运行 C 代码。`lua_error` 或 `luaL_error` 显式抛出异常。
 
 ```c
 static int F(lua_State *L)
@@ -107,8 +106,7 @@ static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
         free(ptr);
         return NULL;
     }
-    else
-        return realloc(ptr, nsize);
+    else return realloc(ptr, nsize);
 }
 
 lua_Alloc lua_getallocf(lua_State *L, void **ud);           // 返回 L 的分配函数和不透明指针 ud
@@ -212,7 +210,7 @@ static int finishpcall(lua_State* L, int status, intptr_t ctx) {
 static int luaB_pcall(lua_State* L) {
 	printf("Call luaB_pcall\n");
 	int status;
-7	luaL_checkany(L, 1);
+ 	luaL_checkany(L, 1);
 	status = lua_pcallk(L, lua_gettop(L) - 1, LUA_MULTRET, 0, 0, finishpcall);
 	return finishpcall(L, status, 0);
 }
@@ -262,7 +260,7 @@ static void _C_DeCounter(lua_State* L, int n) {
 	else
 		printf("counter end\n");
 }
-7
+
 int C_DeCounter(lua_State* L) {
 	counter = lua_tointeger(L, -1);
 	lua_pop(L, 1);
@@ -394,8 +392,7 @@ Lua 状态机之间不能直接通信，需要借助 C 进行数据传递，例�
 lua_pushstring(L2, lua_tostring(L1, -1));
 ```
 
-
-实现一个多线程并发库（C++） [`lproc`](./Lua%20LIB/LuaWithC/Concurrency/concurrency.cpp)，为每个线程创建一个独立的 Lua 状态机。[Lua 方调用](./Lua%20LIB/LuaWithC/Concurrency/lproc.lua)：
+实现一个多线程并发库 [`lproc`](./Lua%20LIB/LuaWithC/code/concurrency.c)，为每个线程创建一个独立的 Lua 状态机。[Lua 方调用](./Lua%20LIB/LuaWithC/code/lproc.lua)：
 
 ```lua
 local lproc = require "lproc" 
@@ -501,7 +498,7 @@ receive:        Mess_5
 - [lua 调用 C 函数](./Lua%20LIB/LuaWithC/code/Lua_Call_C.c)
 - [C 函数的协程调度模型](./Lua%20LIB/LuaWithC/code/Continue_CFunc.c)
 - [用户数据类型](./Lua%20LIB/LuaWithC/code/BitArray.c)，定义一个布尔数组（*BitArray*）。
-- [多线程并发 lproc 库设计](./Lua%20LIB/LuaWithC/code/concurrency.cpp)，[Lua source](./Lua%20LIB/LuaWithC/code/lproc.lua)
+- [多线程并发 lproc 库设计](./Lua%20LIB/LuaWithC/code/concurrency.c)，[Lua source](./Lua%20LIB/LuaWithC/code/lproc.lua)
 - [状态机内存分配限制](./Lua%20LIB/LuaWithC/code/memlimit.c)，[Lua source](./Lua%20LIB/LuaWithC/code/memlimit.lua)
 - [C 库函数](./Lua%20LIB/CMudule/README.md)
 

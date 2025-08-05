@@ -1,7 +1,5 @@
-extern "C" {
 #include "test.h"
-}
-#include "lua.hpp"
+//#include "lua.hpp"
 #include <string.h>
 #include <threads.h>
 
@@ -182,7 +180,7 @@ static int ll_exit(lua_State* L) {
 }
 
 static int ll_threadID(lua_State* L) {
-	lua_pushnumber(L, thrd_current()._Tid);
+	lua_pushinteger(L, thrd_current()._Tid);
 	return 1;
 }
 
@@ -206,7 +204,6 @@ void test_lproc() {
 	luaL_requiref(L, "lproc", luaopen_lproc, 1);
 	lua_pop(L, 1);
 	luaL_dofile(L, "lproc.lua");
-	struct timespec tm = { .tv_sec = 1 };
+	thrd_sleep(&(struct timespec){ .tv_nsec = 100*1000*1000 }, NULL);
 	lua_close(L);
-	thrd_sleep(&tm, NULL);
 }

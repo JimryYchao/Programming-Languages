@@ -21,7 +21,7 @@
     <ClCompile Include="C_Call_Lua.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="concurrency.cpp">
+    <ClCompile Include="concurrency.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Continue_CFunc.c">
@@ -33,7 +33,7 @@
     <ClCompile Include="memlimit.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="test_main.cpp">
+    <ClCompile Include="test_main.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
