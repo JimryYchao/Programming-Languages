@@ -118,7 +118,7 @@ typedef struct {
 	volatile int data;
 	volatile bool ready;
 } SharedData;
-static volatile current_consumer_count = 0;
+static volatile int current_consumer_count = 0;
 static int producer(void* arg)      // 生产者线程函数
 {
 	SharedData* sd = (SharedData*)arg;

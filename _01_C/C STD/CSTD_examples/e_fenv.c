@@ -12,7 +12,6 @@
 #pragma fenv_access (on)  
 #endif
 
-
 // 测试浮点异常
 void show_fe_exceptions(bool isclear) {
 	printf("current floating-point exception raised: ");
@@ -30,7 +29,7 @@ void example_fe_exceptions(void) {
 	printf("\n>>> Floating-Point Exception Testing\n");
 	feclearexcept(FE_ALL_EXCEPT);
 	double a = 1.0, b = 0.0;
-	printf("1.0 / 0.0 = %f\n", a / b);		  // FE_DIVBYZERO
+	printf("1.0 / 0.0 = %f\n", a / b);		      // FE_DIVBYZERO
 	show_fe_exceptions(true);
 
 	printf("sqrt(-1.0) = %f\n", sqrt(-1.0));   // FE_INVALID
@@ -56,7 +55,7 @@ void show_fe_rounding(void)
 	case FE_DOWNWARD:   printf("FE_DOWNWARD");   break;
 	case FE_UPWARD:     printf("FE_UPWARD");     break;
 	case FE_TOWARDZERO: printf("FE_TOWARDZERO"); break;
-		// case FE_TONEARESTFROMZERO: printf("FE_TONEARESTFROMZERO"); break;   // C23
+	// case FE_TONEARESTFROMZERO: printf("FE_TONEARESTFROMZERO"); break;   // C23
 	default:            printf("unknown");
 	};
 	printf("\n");
@@ -117,7 +116,7 @@ void example_fe_environment(void) {
 	show_fe_rounding();
 
 	// 复制 flag
-	fesetexceptflag(&ex, FE_ALL_EXCEPT);  
+	fesetexceptflag(&ex, FE_ALL_EXCEPT);
 	show_fe_exceptions(false);
 	show_fe_rounding();
 
