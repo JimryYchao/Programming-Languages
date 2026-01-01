@@ -1,25 +1,25 @@
 ## Lua 规范摘要
-
 ### 基本概念
 
 #### 类型系统
 
-Lua 是一种动态类型语言，通常作为嵌入式语言在宿主语言上下文中被调用。有 8 种内置基本类型 ***nil***, ***boolean***, ***number***, ***string***, ***function***, ***userdata***, ***thread***, ***table***。
-- *number* 包括 64 位大小的 *integer* 和 *float*，整数溢出则发生环绕；
-- *string* 是不可变的 UTF-8 字符序列；
-- *function* 表示 Lua 函数和 C 函数；
-- *userdata* 用于将任意 C 数据的原始内存块存储在 Lua 变量中，分为 *full userdata* (由 Lua 管理的占据内存的 C 对象) 和 *light userdata* (C 指针值)；它们没有预定义操作，只能通过 C API 创建或修改；
-- *thread* 表示独立的执行线程，用于实现协程。
-- *table* 实现关联数组，是 Lua 中唯一的数据结构化机制，可用于表示数组、列表、集合、图、记录、字典、树等。与 *nil* 关联的任何键不视为表的一部分。
+Lua 是一种动态类型语言，有 8 种内置基本类型：
+- *nil*：空值，*table*，*function*，*thread*，*full userdata* 默认为 *nil*
+- *number*： 64 位（默认）*integer* 和 *float*
+- *string*：不可变 UTF-8 字符序列；
+- *function*：Lua 或 C 函数；
+- *userdata*：分为 *full userdata* (由 Lua 管理的占据内存的 C 对象) 和 *light userdata* (C 指针值)
+- *thread*：表示独立的执行线程，用于实现协程。
+- *table*：可用于表示数组、列表、集合、图、记录、字典、树等
 
-*table*，*function*，*thread*，*full userdata* 值为对象，变量保存对它们的引用。`type()` 返回给定值的类型字符串。
+*table*，*function*，*thread*，*full userdata* 值为对象，变量保存对它们的引用。`type(v)` 返回给定值的类型字符串。
 
 >---
-#### 环境
+#### 模块与环境
 
-对任何自由变量 `var` 的调用都转换为对 `_Env.var` 的调用，每个 Lua 块的变量都在块的外部变量 `_Env` 范围内编译。当加载一个 Lua 块时，它的 `_Env` 首先初始化为全局环境 `_G`；然后所有的标准库都加载到全局环境中，可以使用 `load` 或 `loadfile` 加载具有不同环境的块。在 C 中必须先加载块，然后更改（`C::lua_setupvalue`）其第一个 *upvalue* 的值。 
+非局部变量 `var` 的调用都转换为对 `_Env.var` 的调用，每个 Lua 块的变量都在块的外部变量 `_Env` 范围内编译。加载一个块时，`_Env` 首先初始化为全局环境 `_G` 并加载标准库。
 
-全局变量都可以在 `_G` 表中由变量名为键进行索引或更改。测试一个变量是否存在，不能简单的和 `nil` 比较，访问 `nil` 值会引发一个错误；可以利用 `rawget`：
+全局变量都可以在 `_G` 表进行索引或更改。`rawget` 执行表的原始访问：
 
 ```lua
 function isExist(varName)
@@ -34,7 +34,7 @@ if isExist("varName") then
 end
 ```
 
-起初，`_G` 和 `_ENV` 指向同一个表，创建的全局变量均可通过两者进行访问；`_ENV` 可以指向一个新的用户定义环境，并丢失之前的状态。
+`_ENV` 可以指向一个新的用户定义环境，并丢失之前的状态。
 
 ```lua  
 a = 1     
@@ -48,7 +48,17 @@ _G.a = 20
 print(_ENV.a, _G.a)  -- 10   20 
 ```
 
-当加载另一个模块时，被加载模块的全局变量会自动进入当前环境。可以利用 `_ENV` 的定界特性，将模块进行分离：
+一个模块由 Lua 或 C 编写，通过 `require` 加载，任何导出变量加载至本地 `_ENV` 中，仅加载一次并保存到 `package.loaded`。
+
+```lua
+mod = require(moduleName)
+---------------------------------
+local m = require "mod"			--> 引入 mod 模块
+local f = require "mod".func    --> 引入 mod 模块中的 func 函数
+local sub = require "mod.sub"	--> 引入 mod.sub 子模块
+```
+ 
+加载另一个模块时，模块的导出变量自动进入当前环境。可以利用 `_ENV` 的定界特性，将模块进行分离：
 
 ```lua
 -- M1.lua
@@ -64,63 +74,27 @@ local M1 = require "M1"
 M1.func()   
 ```
 
->---
-#### 模块与包
-
-一个模块（Module）可以是由 Lua 或 C 编写的一些代码，这些代码通过 `require` 加载并创建一个表，这个表中的导出变量被加载至本地的环境变量 `_ENV` 中。每个模块仅加载一次，`package.loaded` 保存 `require` 加载的模块。
-
-```lua
-mod = require(moduleName)
----------------------------------
-local m = require "mod"			--> 引入 mod 模块
-local f = require "mod".func    --> 引入 mod 模块中的 func 函数
-local sub = require "mod.sub"	--> 引入 mod.sub 子模块
-```
-
-`require` 首先搜索 `package.path` 指定的路径检查模块是否存在，并通过 `loadfile` 对其进行加载。未找到时搜索 `package.cpath` 并通过 `package.loadlib` 进行加载。返回的加载函数具有返回值时，`require` 返回这个值并保存到 `package.loaded` 中。强制 `require` 加载同一模块两次，可以先将模块从 `package.loaded` 中移除（`package.loaded["mod"] = nil`）
-
-```lua
-local mod = require "Mod"    --> 首次加载
-package.loaded["Mod"] = nil  --> 卸载 Mod
-mod = require "Mod"          --> 再次加载
-```
-
-搜索路径是一组模板，其中的每项都指定了将模块名转换为文件名的方式。
-
-```lua
-package.path = [[?;?.lua;c:windows\?;/usr/local/lua/?/?.lua]]
-local mod = require "sql"	-- 尝试搜索
-    --[[
-        spl
-        sql.lua
-        c:\windows\sql
-        /usr/local/lua/sql/sql.lua
-    ]]
-
-package.cpath = [[.\"?.dll;C:\Program Files\Lua504\dll\?.dll]]
-```
-
 > *构建模块*
 
 ```lua
--- Mod.lua : 创建一个模块的常用形式
+-- M.lua : 创建一个模块的常用形式
 local M = {}
-M.Add = function(c1, c2) end
-M.Sub = function(c1, c2) end
-M.Mul = function(c1, c2) end
-M.Inv = function(c1, c2) end
-M.Div = function(c1, c2) end
+M.Add = function(c1, c2) ... end
+M.Sub = function(c1, c2) ... end
+M.Mul = function(c1, c2) ... end
+M.Div = function(c1, c2) ... end
 return M
 -------------------------------
--- other.lua : 加载 Mod 模块
-local mod = require "Mod"
+-- other.lua : 加载 M 模块
+local m = require "M"
+local sum = m.Add(lhs, rhs);
 ```
 
 
 >---
 #### 编译与执行
 
-Lua 作为解释型语言，可以在运行代码前执行预编译。`dofile(filename)` 是执行 Lua 代码段的主要方式之一。`loadfile` 与 `load` 执行预编译并返回一个函数，利用 `assert(loadfile(...))` 断言预编译是否发生错误。`load` 总是在全局环境中执行预编译，因此不涉及词法定界，常用于执行外部代码或动态生成的代码：
+Lua 可以在运行代码前执行预编译。`dofile(filename)` 是执行 Lua 代码段的主要方式之一。`loadfile` 与 `load` 执行预编译并返回一个函数，利用 `assert(loadfile(...))` 断言预编译是否发生错误。`load` 总是在全局环境中执行预编译，因此不涉及词法定界，常用于执行外部代码或动态生成的代码：
 
 ```lua
 i = 32
@@ -143,7 +117,7 @@ assert(loadfile("name.lc"))()
 >---
 #### 错误处理
 
-错误将中断程序正常流程。可以调用 `error(mess, level)` 显式抛出错误并沿着堆栈进行传播；`assert(exp, mess)` 执行断言并在 `exp` 为 `false` 或 `nil` 时抛出错误；安全调用函数 `pcall(func, args...)` 和 `xpcall(func, handle, args...)` 用于捕获错误，常用 `debug.debug` 和 `debug.traceback` 作为 `xpcall` 的消息处理函数。函数 `warn` 用于生成一条警告消息。
+错误将中断程序正常流程。`error(msg, level)` 抛出错误；`assert(exp, msg)` 执行断言；`warn(msg)` 生成警告；安全调用函数 `pcall(func, args...)` 和 `xpcall(func, handle, args...)` 用于捕获错误，常用 `debug.debug` 和 `debug.traceback` 作为 `xpcall` 的消息处理函数。
 
 ```lua
 function panic(msg)
@@ -159,7 +133,7 @@ function handle(errno)
     print("errno: " .. errno)
 end
 -- 同 pcall 并附带一个消息处理程序
-ok, stat = xpcall(panic, handle, 1)
+ok, stat = xpcall(panic, handle, 1)  -- false, nil
 ```
 
 
@@ -176,7 +150,8 @@ local                  -- 局部变量声明
 self                   -- 表函数自引用
 _                      -- 弃元  
 nil                    -- 空值
-true,false             -- 布尔
+true,false             -- 布尔值
+
 function               -- 函数声明
 break,goto,return      -- 跳转语句
 for,in                 -- for
@@ -199,12 +174,9 @@ end                    -- 语句块结束
 ---
 ### 类型与声明
 
-Lua 中有 8 个基本类型分别为：*nil*（空）、*boolean*（布尔）、*number*（数值）、*string*（字符串）、*userdata*（用户数据）、*function*（函数）、*thread*（线程） 和 *table*（表）。
+Lua 中有 8 个基本类型分别为：*nil*（空）、*boolean*（布尔）、*number*（数值）、*string*（字符串）、*userdata*（用户数据）、*function*（函数）、*thread*（线程） 和 *table*（表）。`local` 声明局部变量。
 
-简单值类型包含 *nil*，*boolean*，*number*，*string*。`local` 限定局部变量：
-- 未定义变量值为 `nil`。`nil` 可用于将某个不再使用的变量或 *table* 的键置空，Lua 会自动回收该变量。
-- `false` 和 `nil` 的布尔条件测试返回假，其他值返回真。
-- 数值类型内置整数和浮点数，真值相同的整数和浮点数被视为相等，`math.type(n)` 返回数值内部类型；浮点数支持 E 和 P 计数法。    
+未定义变量值为 `nil`。`nil` 可将变量或 *table key* 置空，Lua 会自动回收。布尔表达式 `false` 和 `nil` 返回 *false*。真值相同的整数和浮点数被视为相等，`math.type(n)` 返回数值内部类型；浮点数支持 E 和 P 计数法。    
 
 
 ```lua
@@ -236,21 +208,10 @@ type(coroutine.wrap(type))     --> function
 2^64 | 0       --> 超出范围
 ```
 
-> 局部变量与常量属性
-
-`local` 声明与块范围关联的局部变量，局部变量无法通过 `_ENV` 访问，但可以作为模块的返回值；`<const>` 为局部变量赋予常量属性。
-
-```lua
-local m = {}
-local C <const> = 10086
-m.v = C
-return m
-```
-
 >---
 #### string
 
-支持转义字符串 `"string"` 或 `'string'` 和原始字符串 `[=[string]=]`。`#str` 返回字符串字节数，`x .. y` 拼接字符串，操作数可以是字符串或数值。Lua 运行时提供了数值和字符串之间的自动转换。算术操作时，Lua 会预先尝试将字符串转换成数值类型。
+支持转义字符串 `"string"` 或 `'string'` 和原始字符串 `[=[string]=]`。`#str` 返回字符串字节数，`x .. y` 拼接字符串，操作数可以是字符串或数值。
 
 ```lua
 a = "a 'line\n'"
@@ -278,7 +239,7 @@ second line
 \ddd         --> \000 ~ \255
 \xhh         --> \x00 ~ \xff
 \u{h…h}      --> \w{00000000} ~ \u{7fffffff}
-\[,\]        --> 方括号
+\[ \]        --> 方括号
 ```
 
 `\z`：忽略随后任意数目的空白字符直到第一个非空白字符。
@@ -293,7 +254,7 @@ second line
 >---
 #### table
 
-表（table）是 Lua 中唯一的数据结构机制，可以用来表示数组、列表、符号表、集合、记录、图形、树等数据结构。Lua 使用 `_G` 表用来存储全局变量。键可以是除 `nil` 和 `NaN` 外的任何值，值为 `nil` 任何键都不被视为表的一部分，`t.key = nil` 可以作为删除一组键值对的方式。
+表（table）是 Lua 中唯一的数据结构机制，可以表示数组、列表、符号表、集合、记录、图形、树等数据结构。Lua 使用全局环境 `_G` 表用来存储全局变量。*key* 可以是除 `nil` 和 `NaN` 外的任何值，值为 `nil` 任何键不被视为表的一部分。
 
 ```lua
 t1 = {
@@ -339,16 +300,14 @@ a4[1] = 1; a4[2] = 2; a4[4] = 4  --> #a = 4, 中间存在空洞
 >---
 #### function
 
-Lua 函数是第一类值，函数定义实质上就是创建类型为 `function` 的值并赋值给变量
+Lua 函数是第一类值，可以赋值给变量。
 
 ```lua
--- 函数声明
-function Func( <params> )
+function Func( Params )
     body | return multi -- 多值返回
 end
-Func = function Decl
+Func = function( Params) ... end
 
--- 匿名函数
 function GetCounter() 
     local v = 0
     return function()   -- 函数闭包
@@ -360,7 +319,7 @@ counter = GetCounter()
 v = counter()  -- 1
 ```
 
-当函数只有一个参数且该参数是字符串常量或表构造器时，函数调用表达式 `f()` 括号是可选的。
+当函数只有一个参数且是字符串常量或表构造器时，`f()` 括号是可选的。
 
 ```lua
 print "Hello"  -- print("Hello")
@@ -369,7 +328,7 @@ type {}        -- type({})
 
 > *变长参数*
 
-变长参数 `...` 在函数内部可以利用 *table* `{...}` 进行收集，或利用多重赋值按顺序提取；`table.pack` 检测参数中是否有 `nil`。
+变长参数 `...` 在函数内部可以利用 *table* `{...}` 进行收集，或多重赋值按序析构。
 
 ```lua
 function Foo(a, ...)
@@ -385,14 +344,13 @@ Foo(1, 2, 3, 4, 5, 6)
 ```
 
 
-另一种访问变长参数的方法是利用 `select(n,...)`，n 为数值时，返回第 n 个参数后的所有参数；n 是 `"#"` 时，返回额外参数的总数。
+另一种访问变长参数的方法是利用 `select(n, ...)`；n 是 `"#"` 时，返回额外参数的总数。
 
 ```lua
 -- 打印奇数位的元素
 function Foo(...)
     local len = select("#", ...)
-    local i = 1
-    local a = 0
+    local i, a = 1, 0
     while i <= len do
         a = select(i, ...)
         print(a)
@@ -404,7 +362,7 @@ Foo(1,2,3,4,5,6,7,8)	-- 1 3 5 7
 
 > *表函数*
 
-表调用自身的表函数成员时，可以通过两种方式调用：`table.fun()` 或 `table:fun()`。`table:fun` 默认将表自身作为第一个参数传递给表函数。
+表调用自身的表函数成员时，可以通过两种方式调用：`t.fun()` 或 `t:fun()`。`t:fun` 默认将表自身作为第一个参数传递给表函数。`T:Func(params)` 函数声明相当于 `T.Func(self, params)`。
 
 ```lua
 t = {1,2,3,4,5,6}
@@ -418,64 +376,28 @@ end
 t:Traverse()	-- 传递自身作为首位参数到表函数中
 ```
 
-外部声明表函数的通过 `:` 声明，表示默认将表自身作为第一个参数传入函数：
-
-```lua
-function T:Traverse()
--- 等价于
-function T.Traverse(self)
-```
-
 >---
 #### thread 与 coroutine
 
-从多线程的角度看，协程（coroutine）与线程（thread）类似：协程是一系列的可执行语句，拥有自己的栈、局部变量和指令指针，同时协程又与其他协程共享了全局变量和其他几乎一切资源。
+从多线程的角度看，协程（coroutine）与线程（thread）类似：协程是一系列的可执行语句，拥有自己的栈、局部变量和指令指针，与其他协程共享了全局变量和其他几乎一切资源。
 
-线程与协程的区别在于，多线程程序可以并行运行多个线程，协程需要彼此协作，任意指定的时刻只能有一个协程运行，正在运行的协程被挂起时其执行才会暂停。可以使用 `coroutine.create(function)` 创建一个新协程，返回一个 `thread` 类型。
-
-一个协程有四种状态：挂起（suspended）、运行（running）、正常（normal）、死亡（dead）。`coroutine.status(co)` 查看协程对象状态。
-
-当一个协程创建时，它不会自动运行而处于挂起（suspended）状态，利用 `coroutine.resume(co)` 用于启动或恢复一个协程，并改状态为运行（running）；若协程体运行之后就终止了，它的状态转变为死亡（dead）。当协程 A 唤醒协程 B 时（执行权移交给 B），A 会变成正常状态（normal），而协程 B 会变成运行（running）。
+一个协程有四种状态：挂起（suspended）、运行（running）、正常（normal）、死亡（dead）。当
+协程创建时，它不会自动运行而处于挂起状态。
 
 ```lua
-co = coroutine.create(<function(params)>)
+co = coroutine.create(function)
 print(coroutine.status(co))     -- suspended
-
 coroutine.resume(co [,params])  -- running
 print(coroutine.status(co))     -- dead
 ```
 
-`coroutine.yield()` 可以让一个运行中的协程挂起，之后在 `resume` 后恢复运行，协程会继续执行直到遇到下一个 `yield` 或执行结束。`resume` 已经结束的协程（dead 状态）会返回 `false` 和一条信息（`"cannot resume dead coroutine"`）。协程中通过 `resume`，`yield` 在主函数与协程之间来交换数据。
-
-```lua
-co = coroutine.create(function()
-    local count = 0
-    while true do
-        count = count + 1
-        print("yield :", coroutine.yield(count))
-    end
-end)
-print("resume:" , coroutine.resume(co, "hi"))
-print("resume:" , coroutine.resume(co, 1, 1, 1))
-print("resume:" , coroutine.resume(co, "hello"))
---[[
-    resume::        true    1
-    yield::         1       1       1
-    resume::        true    2
-    yield::         hello
-    resume::        true    3
-]]
-```
-
-`coroutine.wrap(f)` 返回一个 `function` 类型的协程，和 `create(co)` 构造的 `thread` 区别在于，`coroutine.yield` 或协程结束返回时，不会返回函数是否正常运行或恢复运行的状态，也无法获得 `function` 协程的状态。
-
-`thread` 协程的主函数发生错误时不会终止程序，会将错误发送到 `resume` 的返回中；而 `function` 协程直接将导致程序错误。
+`coroutine.wrap(f)` 返回一个 `function` 类型的协程，无法获得 `function` 协程的状态。`thread` 协程的主函数发生错误时不会终止程序，会将错误发送到 `resume` 的返回中；而 `function` 协程直接将导致程序错误。
 
 ```lua
 local co = coroutine.create(f)
 local cf = coroutine.wrap(f)
 -- 调用 thread 协程
-coroutine.resume(co)
+local ok [,rt] = coroutine.resume(co)
 -- 调用 function 协程
 cf()
 ```
@@ -518,58 +440,12 @@ for a in permutations { 1, 2, 3 } do
 end
 ```
 
-> *coroutine.running*
-
-函数 `coroutine.running()` 返回正在运行的协程和一个 *boolean* 值，当正在运行的协程是主函数 `main` 时返回 `true`。
-
-```lua
-print(coroutine.running())
-local co = coroutine.create(function()
-    print("join in co")
-    local c, ismain = coroutine.running()
-    print(c, ismain, "\nco : " .. tostring(co))
-end)
-coroutine.resume(co)
---[[
-    thread: 0000017C2872F458        true
-    join in co
-    thread: 0000017C287A43E8        false
-    co : thread: 0000017C287A43E8
-]]
-```
-
-> *coroutine.close*
-
-函数 `coroutine.close(co)` 用于关闭待关闭的 suspended 或 dead 状态的协程并返回 `true`；关闭正在运行的协程会发生错误并返回 `false` 和错误信息。
-
-```lua
-local co = coroutine.create(function()
-    print(coroutine.close(co)) -- cannot close a running coroutine
-    print("join in co")
-end)
-coroutine.resume(co)
-```
-
-> *coroutine.isyieldable*
-
-函数 `coroutine.isyieldable(co?)` 用于判断协程是否是可让步（yield）的。如果协程不是主线程，也不在不可让步 C 函数中，则该协程是可让步的。
-
-```lua
--- main
-print(coroutine.isyieldable())     -- false, 主线程
-
-local co = coroutine.create(function()
-    print("join in co")
-end)
-print(coroutine.isyieldable(co))   -- true
-```
-
 >---
-#### 局部属性声明
+#### 局部属性
 
 > *const*
 
-`<const>` 属性赋予局部变量常量属性，无法赋值操作，但是不影响作为常量表成员的任何操作。
+`<const>` 属性赋予局部变量常量属性。
 
 ```lua
 local t <const> ={ a = 1}
@@ -579,7 +455,7 @@ t.a = 2		-- ok
 
 > *close*
 
-一个 `to-be-closed` 对象的行为类似于一个局部常量（无法重新定义），赋予 `<close>` 属性的值必须具有 `__close` 字段关联的元方法或 `false`。局部变量生存期结束时，将按声明的相反顺序依次调用 `__close`。
+一个 `to-be-closed` 局部变量（`<close>`）必须具有 `__close` 字段关联的元方法或 `false`。局部变量生存期结束时，将按声明的相反顺序依次调用 `__close`。
 
 一个协程被挂起时且永远不会被恢复时，设定 `__close` 的对象值生存期被无限延长，因此它们也不会被关闭。可以调用 `coroutine.close(co)` 或调用 `__gc` 关闭这些变量。
 
@@ -621,15 +497,6 @@ end
 | 赋值       | `x = y`                                                  |
 
 
-`x // y` floor 触发对商向负无穷取整。
-
-```Lua
-3 // 2         --> 1
-3.0 // 2       --> 1.0
--9 // 2        --> -5
-1.5 // 0.5     --> 3.0
-```
-
 `x % y` 取模运算的定义 ```x%y = x-((x//y)*y)```，其结果的符号与第二操作数一致。可以利用取模运算保留浮点运算有效位。
 
 ```lua
@@ -643,9 +510,9 @@ math.pi - math.pi % 0.0001	--> 3.1415
 ```lua
 10 or 20            --> 10
 10 and 20           --> 20
-nil or "a"          --> "a"
 false and nil       --> false
 false or nil        --> nil
+nil or "a"          --> "a"
 ```
 
 可以利用 `and` 和 `or` 机制构造三目运算：
@@ -682,8 +549,6 @@ X and Y or Z
 
 #### 代码块：do-end
 
-`do end` 可以在文件或函数域出现
-
 ```lua
 do
     <code>
@@ -693,7 +558,7 @@ end
 >---
 ####  条件控制：if
 
-`false` 和 `nil` 值为假，`true` 和非 `nil` 任意值为真。
+`false` 和 `nil` 值为假，`true` 和非 `nil` 值为真。
 
 ```lua
 if <condition> then
@@ -793,7 +658,7 @@ end
 >---
 #### 跳转语句：break, return, goto
 
-`break` 中断最内层循环语句；`goto` 无条件跳转当前范围的标签处；`return` 从当前范围返回零到多个值。
+`break` 中断循环；`goto` 标签跳转；`return` 函数返回。
 
 
 ```lua
@@ -824,7 +689,7 @@ return 0   -- 文件范围返回值
 ---
 ### 元表与元方法
 
-元表定义了其原始值允许的某些操作，可以设置元表中特定元方法的字段来更改值行为。`getmetatable(t)` 获取父级元表。`setmetatable(t, metatable)` 替换表的元表，`metatable` 为 `nil` 时，表示删除 `t` 的元表。*table* 和 *full userdata* 具有单独的元表，除字符串外其他的值类型默认没有元表。
+元表定义了其原始值允许的某些操作，可以设置元表中特定元方法的字段来更改值行为。*table* 和 *full userdata* 具有单独的元表，除字符串外其他的值类型默认没有元表。
 
 ```lua
 local subTable, father = {}, {}
@@ -868,32 +733,6 @@ __close     -- 待关闭变量 <close>
 __mode      -- 弱表模式 "k","v","kv"
 __metatable -- 元表
 __pairs     -- 在 for-pairs 替选调用
-```
-
-每种运算符都有一个对应的元方法。例如对两个表进行算术操作 `a + b` 时，首先查找第一个操作数的 `__add` 元方法并尝试调用；否则查找第二个操作数的 `__add`；否则抛出异常。
-
-```lua
-local mt = {}
-function mt.__add(a, b)
-    local set = {}
-    local len = #a > #b and #a or #b
-    for i = 1, len do
-        set[i] = a[i]
-    end
-    for j = 1, #set do
-        set[j] = a[j] + b[j]
-    end
-    return set
-end
-
-local t1 = { 1, 2, 3, 4, 5, 6 }
-local t2 = { 6, 5, 4, 3, 2, 1 }
-setmetatable(t1, mt)
-
-local newt = t1 + t2
-for i = 1, #newt do
-    print(newt[i]) -- 7 7 7 7 7 7
-end
 ```
 
 通常会将 `a <= b` 作为其他关系元方法的基方法。

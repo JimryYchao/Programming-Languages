@@ -125,7 +125,7 @@ void example_owner_less() {
 
 	owner_less<shared_ptr<int>> cmp;
 	cout << "sp1 < sp3: " << cmp(sp1, sp3) << "\n";  // true
-	cout << "sp1 < sp2: " << cmp(sp1, sp2) << "\n\n"; // false
+	cout << "sp1 < sp2: " << cmp(sp1, sp2) << "\n"; // false
 }
 
 // Atomic smart pointers
@@ -160,9 +160,9 @@ void example_smart_ptr_adapters() {
 	cout << "static_cast result: " << static_cast_ptr->get_value() << "\n";
 }
 
-// 9. Memory management utility functions
+// Memory management utility functions
 void example_memory_management_functions() {
-	cout << "\n===  内存管理工具函数 ===\n";
+	cout << "\n=== memory management functions ===\n";
 	int* ptr = new int[5];
 
 	// Construction and destruction
@@ -203,11 +203,10 @@ void c_style_resize_buffer(int** buffer, size_t old_size, size_t new_size) {
 	// 返回新缓冲区
 	*buffer = new_buffer;
 }
-// out_ptr：用于从 C 风格 API 获取分配的内存
-void example_out_ptr() {
+// out_ptr 会自动管理 C API 分配的内存，避免内存泄漏
+void example_out_ptr() {  // out_ptr：用于从 C 风格 API 获取分配的内存
 	cout << "\n=== out_ptr ===\n";
 	// 使用 out_ptr 将 C 风格 API 返回的原始指针包装为智能指针
-	// out_ptr 会自动管理 C API 分配的内存，避免内存泄漏
 	unique_ptr<int[]> ptr;
 	c_style_create_buffer(std::out_ptr(ptr), 5);
 	cout << "Buffer contents: ";
@@ -240,7 +239,7 @@ void example_uninitialized_storage() {
 	const size_t size = 3;
 	TestObj* dest = static_cast<TestObj*>(::operator new(sizeof(TestObj) * size));
 	// 默认构造对象
-	uninitialized_default_construct(dest, dest + size);
+	uninitialized_default_construct(dest, dest + size);  // call 3 ctor
 	for (size_t i = 0; i < size; ++i)
 		dest[i].value = i * 10;
 	cout << "uninitialized_default_construct result: ";
@@ -248,7 +247,7 @@ void example_uninitialized_storage() {
 		cout << dest[i].value << " ";
 	cout << "\n";
 	// 清理
-	destroy(dest, dest + size);
+	destroy(dest, dest + size);  // call 3 ~()
 	::operator delete(dest);
 }
 
@@ -266,7 +265,7 @@ struct AllocAware {
 		cout << "AllocAware ctor with Alloc: value=" << value << ", name=" << name << "\n";
 	}
 	~AllocAware() {
-		cout << "~AllocAware(): value=" << value << ", name=" << name << "\n";
+		cout << "~AllocAware() \n\n";
 	}
 };
 template<typename Alloc>  // 特化 uses_allocator 以支持 AllocAware 类
@@ -277,10 +276,14 @@ void example_allocator_construction() {
 	// 创建分配器
 	std::allocator<AllocAware> alloc;
 
+	// default ctor 创建对象
+	{
+		auto obj = AllocAware(0, "empty");
+	}
+
 	// make_obj_using_allocator 创建对象
 	{
 		auto obj1 = std::make_obj_using_allocator<AllocAware>(alloc, 42, "object1");
-		cout << "obj1: " << obj1.value << ", " << obj1.name << "\n";
 	}
 
 	// uses_allocator_construction_args 准备构造参数
@@ -289,7 +292,6 @@ void example_allocator_construction() {
 		auto args = std::uses_allocator_construction_args<AllocAware>(alloc, 100, "object2");
 		// 手动使用参数包构造对象
 		AllocAware obj2(std::get<0>(args), get<1>(args));
-		cout << "obj2: " << obj2.value << ", " << obj2.name << "\n";
 	}
 
 	// 使用 uninitialized_construct_using_allocator 在未初始化内存上构造对象
@@ -297,10 +299,26 @@ void example_allocator_construction() {
 		// 分配未初始化内存
 		AllocAware* memory = alloc.allocate(1);
 		std::uninitialized_construct_using_allocator(memory, alloc, 200, "object3");
-		cout << "object3: " << memory->value << ", " << memory->name << "\n";
 		std::destroy_at(memory);
 		alloc.deallocate(memory, 1);
 	}
+}
+
+// 辅助打印函数
+void print(const auto& value, const string& label) {
+	cout << label << ": " << value << endl;
+}
+
+void printArray(const auto& arr, size_t size, const string& label) {
+	cout << label << ": ";
+	for (size_t i = 0; i < size; ++i) {
+		cout << arr[i] << " ";
+	}
+	cout << endl;
+}
+// start_lifetime
+void example_start_lifetime() {
+	cout << "\n=== start_lifetime TODO ===\n";
 }
 
 // Test entry function
@@ -317,4 +335,6 @@ void test_memory() {
 	example_inout_ptr();
 	example_uninitialized_storage();
 	example_allocator_construction();
+
+	example_start_lifetime();
 }

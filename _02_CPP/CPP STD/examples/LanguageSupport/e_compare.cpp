@@ -87,15 +87,15 @@ static void example_compare_functions() {
 }
 
 // 演示比较函数算法应用
-static struct Person {
+static struct de_Person {
 	string name;
 	int age;
-	auto operator <=> (const Person& other) const {
+	auto operator <=> (const de_Person& other) const {
 		if (auto cmp = this->name <=> other.name; cmp != 0)
 			return cmp;
 		else return this->age <=> other.age;
 	};
-	friend ostream& operator <<(std::ostream& os, const Person& p) {
+	friend ostream& operator <<(std::ostream& os, const de_Person& p) {
 		os << "{\"" + p.name + "\", " << p.age << "}";
 		return os;
 	}
@@ -105,7 +105,7 @@ static void example_compare_Algorithms()
 	std::cout << "\n[compare with Algorithms]\n";
 
 	// 使用三路比较排序
-	std::vector<Person> p = { {"Tom", 12}, {"Anne",15}, {"Bob", 16}, {"Tom", 17} };
+	std::vector<de_Person> p = { {"Tom", 12}, {"Anne",15}, {"Bob", 16}, {"Tom", 17} };
 	std::ranges::sort(p, [](auto a, auto b) {
 		return (a <=> b) < 0;  // 正序
 		});

@@ -110,16 +110,20 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_ALL_NO_LIB;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <AdditionalIncludeDirectories>C:\_Programme Environment_\_C_Cpp_\boost-1.89.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalLibraryDirectories>C:\_Programme Environment_\_C_Cpp_\boost-1.89.0\stage\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,29 +136,58 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <AdditionalIncludeDirectories>C:\_Programme Environment_\_C_Cpp_\boost-1.89.0;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>C:\_Programme Environment_\_C_Cpp_\boost-1.89.0\bin\lib;</ImportLibrary>
+      <AdditionalLibraryDirectories>C:\_Programme Environment_\_C_Cpp_\boost-1.89.0\stage\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Containers\Containers.ixx" />
+    <ClCompile Include="Containers\e_array.cpp" />
+    <ClCompile Include="Containers\e_deque.cpp" />
+    <ClCompile Include="Containers\e_flat_map.cpp" />
+    <ClCompile Include="Containers\e_flat_set.cpp" />
+    <ClCompile Include="Containers\e_forward_list.cpp" />
+    <ClCompile Include="Containers\e_list.cpp" />
+    <ClCompile Include="Containers\e_map.cpp" />
+    <ClCompile Include="Containers\e_queue.cpp" />
+    <ClCompile Include="Containers\e_set.cpp" />
+    <ClCompile Include="Containers\e_stack.cpp" />
+    <ClCompile Include="Containers\e_unordered_map.cpp" />
+    <ClCompile Include="Containers\e_unordered_set.cpp" />
+    <ClCompile Include="Containers\e_vector.cpp" />
     <ClCompile Include="Diagnostics\Diagnostics.ixx" />
     <ClCompile Include="Diagnostics\e_stacktrace.cpp" />
     <ClCompile Include="Diagnostics\e_system_error.cpp" />
+    <ClCompile Include="Containers\e_span.cpp" />
+    <ClCompile Include="GeneralUtilities\e_any.cpp" />
+    <ClCompile Include="GeneralUtilities\e_bit.cpp" />
+    <ClCompile Include="GeneralUtilities\e_bitset.cpp" />
+    <ClCompile Include="GeneralUtilities\e_expected.cpp" />
+    <ClCompile Include="GeneralUtilities\e_functional.cpp" />
+    <ClCompile Include="GeneralUtilities\e_optional.cpp" />
+    <ClCompile Include="GeneralUtilities\e_tuple.cpp" />
+    <ClCompile Include="GeneralUtilities\e_utility.cpp" />
+    <ClCompile Include="GeneralUtilities\e_variant.cpp" />
+    <ClCompile Include="GeneralUtilities\GeneralUtilities.ixx" />
     <ClCompile Include="LanguageSupport\e_concepts.cpp" />
     <ClCompile Include="LanguageSupport\e_coroutine.cpp" />
     <ClCompile Include="LanguageSupport\e_limits.cpp" />
     <ClCompile Include="LanguageSupport\e_compare.cpp" />
     <ClCompile Include="LanguageSupport\e_cstddef.cpp" />
     <ClCompile Include="LanguageSupport\e_exception.cpp" />
-    <ClCompile Include="e_execution.cpp" />
+    <ClCompile Include="GeneralUtilities\e_execution.cpp" />
     <ClCompile Include="LanguageSupport\e_initializer_list.cpp" />
     <ClCompile Include="LanguageSupport\e_new.cpp" />
     <ClCompile Include="LanguageSupport\e_source_location.cpp" />
     <ClCompile Include="LanguageSupport\e_typeindex.cpp" />
     <ClCompile Include="LanguageSupport\e_version.cpp" />
     <ClCompile Include="LanguageSupport\LanguageSupport.ixx" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryManagement\e_memory.cpp" />
     <ClCompile Include="MemoryManagement\e_memory_resource.cpp" />
     <ClCompile Include="MemoryManagement\e_scoped_allocator.cpp" />
@@ -162,8 +195,10 @@
     <ClCompile Include="Metaprogramming\e_ratio.cpp" />
     <ClCompile Include="Metaprogramming\e_type_traits.cpp" />
     <ClCompile Include="Metaprogramming\Metaprogramming.ixx" />
+    <ClCompile Include="Strings\e_string.cpp" />
+    <ClCompile Include="Strings\e_string_view.cpp" />
+    <ClCompile Include="Strings\Strings.ixx" />
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -58,11 +58,50 @@
 
 > 通用工具库
 
-
+| header                                                                 | description                              | examples                                                      |
+| :--------------------------------------------------------------------- | :--------------------------------------- | :------------------------------------------------------------ |
+| [bitset](https://zh.cppreference.com/w/cpp/header/bitset.html)         | `bitset` 类模板                          | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_bitset.cpp)     |
+| [bit](https://zh.cppreference.com/w/cpp/header/bit.html)               | 位操作                                   | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_bit.cpp)        |
+| [execution](https://zh.cppreference.com/w/cpp/header/execution.html)   | 算法并行执行策略                         | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_execution.cpp)  |
+| [tuple](https://zh.cppreference.com/w/cpp/header/tuple.html)           | `tuple` 类模板                           | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_tuple.cpp)      |
+| [any](https://zh.cppreference.com/w/cpp/header/any.html)               | `any` 类模板                             | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_any.cpp)        |
+| [expected](https://zh.cppreference.com/w/cpp/header/expected.html)     | `expected` 类模板                        | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_expected.cpp)   |
+| [optional](https://zh.cppreference.com/w/cpp/header/optional.html)     | `optional` 类模板                        | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_optional.cpp)   |
+| [variant](https://zh.cppreference.com/w/cpp/header/variant.html)       | `variant` 类模板                         | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_variant.cpp)    |
+| [utility](https://zh.cppreference.com/w/cpp/header/utility.html)       | `pair`, 通用工具组件                     | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_utility.cpp)    |
+| [functional](https://zh.cppreference.com/w/cpp/header/functional.html) | 函数对象、函数调用、绑定操作和引用包装器 | [[↗]](./CPP%20STD/examples/GeneralUtilities/e_functional.cpp) |
 
 > 字符串库
 
+| header                                                                   | description          | examples                                             |
+| :----------------------------------------------------------------------- | :------------------- | :--------------------------------------------------- |
+| [cstring](https://zh.cppreference.com/w/cpp/header/cstring.html)         | C 字符串操作函数     |                                                      |
+| [string](https://zh.cppreference.com/w/cpp/header/string.html)           | `string` 类模板      | [[↗]](./CPP%20STD/examples/String/e_string.cpp)      |
+| [string_view](https://zh.cppreference.com/w/cpp/header/string_view.html) | `string_view` 类模板 | [[↗]](./CPP%20STD/examples/String/e_string_view.cpp) |
+
 > 容器库
+
+| header                                                                       | description            | examples                                                   |
+| :--------------------------------------------------------------------------- | :--------------------- | :--------------------------------------------------------- |
+| [array](https://zh.cppreference.com/w/cpp/header/array.html)                 | `array` 固定长度数组        | [[↗]](./CPP%20STD/examples/Containers/e_array.cpp)         |
+| [vector](https://zh.cppreference.com/w/cpp/header/vector.html)               | `vector` 类模板        | [[↗]](./CPP%20STD/examples/Containers/e_vector.cpp)        |
+| [deque](https://zh.cppreference.com/w/cpp/header/deque.html)                 | `deque` 类模板         | [[↗]](./CPP%20STD/examples/Containers/e_deque.cpp)         |
+| [list](https://zh.cppreference.com/w/cpp/header/list.html)                   | `list` 类模板          | [[↗]](./CPP%20STD/examples/Containers/e_list.cpp)          |
+| [forward_list](https://zh.cppreference.com/w/cpp/header/forward_list.html)   | `forward_list` 类模板  | [[↗]](./CPP%20STD/examples/Containers/e_forward_list.cpp)  |
+| [stack](https://zh.cppreference.com/w/cpp/header/stack.html)                 | `stack` 类模板         | [[↗]](./CPP%20STD/examples/Containers/e_stack.cpp)         |
+| [queue](https://zh.cppreference.com/w/cpp/header/queue.html)                 | `queue` 类模板         | [[↗]](./CPP%20STD/examples/Containers/e_queue.cpp)         |
+| [set](https://zh.cppreference.com/w/cpp/header/set.html)                     | `set` 类模板           | [[↗]](./CPP%20STD/examples/Containers/e_set.cpp)           |
+| [map](https://zh.cppreference.com/w/cpp/header/map.html)                     | `map` 类模板           | [[↗]](./CPP%20STD/examples/Containers/e_map.cpp)           |
+| [flat_set](https://zh.cppreference.com/w/cpp/header/flat_set.html)           | `flat_set` 类模板      | [[↗]](./CPP%20STD/examples/Containers/e_flat_set.cpp)      |
+| [flat_map](https://zh.cppreference.com/w/cpp/header/flat_map.html)           | `flat_map` 类模板      | [[↗]](./CPP%20STD/examples/Containers/e_flat_map.cpp)      |
+| [unordered_set](https://zh.cppreference.com/w/cpp/header/unordered_set.html) | `unordered_set` 类模板 | [[↗]](./CPP%20STD/examples/Containers/e_unordered_set.cpp) |
+| [unordered_map](https://zh.cppreference.com/w/cpp/header/unordered_map.html) | `unordered_map` 类模板 | [[↗]](./CPP%20STD/examples/Containers/e_unordered_map.cpp) |
+| [span](https://zh.cppreference.com/w/cpp/header/span.html)                   | `span` 类模板          | [[↗]](./CPP%20STD/examples/Containers/e_span.cpp)          |
+| [mdspan](https://zh.cppreference.com/w/cpp/header/mdspan.html)               | `mdspan` 类模板        | [[↗]](./CPP%20STD/examples/Containers/e_mdspan.cpp)        |
+
+ <!-- [hive]() -->
+ <!-- [inplace_vector]() -->
+
 
 > 迭代器库
 

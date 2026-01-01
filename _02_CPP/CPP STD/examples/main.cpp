@@ -7,6 +7,9 @@ import LanguageSupport;
 import Diagnostics;
 import MemoryManagement;
 import Metaprogramming;
+import GeneralUtilities;
+import Strings;
+import Containers;
 
 // ==== end test modules ====
 
@@ -20,10 +23,10 @@ char buf[32];
 	 (_T)(func))
 
 int main(void) {
-	/*     language support      */
+	/*     Language support      */
 	//T(test_compare);
 	//T(test_coroutine);
-	T(test_concepts);
+	//T(test_concepts);
 	//T(test_cstddef);
 	//T(test_exception);
 	//T(test_initializer_list);
@@ -33,29 +36,59 @@ int main(void) {
 	//T(test_typeindex);
 	//T(test_version);
 
-	/*     diagnostics      */
+	/*     Diagnostics      */
 	//T(test_stacktrace);
 	//T(test_system_error);
 
-	/*     memory management      */
+	/*     Memory management      */
 	//T(test_memory);
 	//T(test_memory_resource);
 	//T(test_scoped_allocator);
 
-	/*     metaprogramming      */
+	/*     Metaprogramming      */
 	//T(test_ratio);
 	//T(test_type_traits);
 
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
-	/*     language support      */
+	/*     General utilities      */
+	//T(test_any);
+	//T(test_bit);
+	//T(test_bitset);
+	//T(test_execution);
+	//T(test_expected);
+	//T(test_functional);
+	//T(test_optional);
+	//T(test_tuple);
+	//T(test_utility);
+	//T(test_variant);
 
+	/*     Strings      */
+	//T(test_string);
+	//T(test_string_view);
+
+	/*     Containers      */
+	//T(test_array);
+	//T(test_vector);
+	//T(test_deque);
+	//T(test_list);
+	//T(test_forward_list);
+	T(test_stack);
+	//T(test_queue);
+	//T(test_set);
+	//T(test_map);
+	//T(test_flat_set);
+	//T(test_flat_map);
+	//T(test_unordered_set);
+	//T(test_unordered_map);
+
+	//T(test_span);
+	
+
+	/*     language support      */
+	/*     language support      */
+	/*     language support      */
+	/*     language support      */
+	/*     language support      */
+	/*     language support      */
 
 	return 0;
 }
