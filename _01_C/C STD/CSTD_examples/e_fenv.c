@@ -29,19 +29,19 @@ void example_fe_exceptions(void) {
 	printf("\n>>> Floating-Point Exception Testing\n");
 	feclearexcept(FE_ALL_EXCEPT);
 	double a = 1.0, b = 0.0;
-	printf("1.0 / 0.0 = %f\n", a / b);		      // FE_DIVBYZERO
+	printf("1.0 / 0.0 = %f\n", a / b);		       // FE_DIVBYZERO
 	show_fe_exceptions(true);
 
-	printf("sqrt(-1.0) = %f\n", sqrt(-1.0));   // FE_INVALID
+	printf("sqrt(-1.0) = %f\n", sqrt(-1.0));    // FE_INVALID
 	show_fe_exceptions(true);
 
-	printf("exp(1000.0) = %e (should raise FE_OVERFLOW)\n", exp(1000));     // FE_OVERFLOW 
+	printf("exp(1000.0) = %e\n", exp(1000));    // FE_OVERFLOW 
 	show_fe_exceptions(true);
 
-	printf("exp(-1000.0) = %e (should raise FE_UNDERFLOW)\n", exp(-1000));  // FE_UNDERFLOW 
+	printf("exp(-1000.0) = %e\n", exp(-1000));  // FE_UNDERFLOW 
 	show_fe_exceptions(true);
 
-	printf("1.0 / 3.0 = %.20f (should raise FE_INEXACT)\n", (1.0 / 3.0));	   // FE_INEXACT
+	printf("1.0 / 3.0 = %.20f\n", (1.0 / 3.0));	   // FE_INEXACT
 	show_fe_exceptions(true);
 }
 

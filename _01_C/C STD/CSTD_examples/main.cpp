@@ -13,7 +13,7 @@ char buf[32];
 
 int main()
 {
-	//T(test_errno);
+	T(test_errno);
 
 	//T(test_fenv);
 
