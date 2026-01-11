@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include <stdalign.h>
+ #include <stdalign.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -45,3 +45,23 @@ void test_stdalign(void)
 	check_mem_offset(S2);
 	check_mem_offset(S3);
 }
+/*
+In alignas(8) S1:
+		sizeof = 16
+		offset(i) = 0
+		offset(s) = 4
+		offset(b) = 6
+		offset(ld) = 8
+In alignas(8) S2:
+		sizeof = 24
+		offset(i) = 0
+		offset(s) = 8
+		offset(b) = 10
+		offset(ld) = 16
+In alignas(8) S3:
+		sizeof = 24
+		offset(i) = 0
+		offset(s) = 8
+		offset(b) = 10
+		offset(ld) = 11
+*/

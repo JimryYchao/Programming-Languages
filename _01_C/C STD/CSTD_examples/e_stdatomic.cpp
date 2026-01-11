@@ -13,7 +13,7 @@ static int atomic_increment(void* arg)
 {
 	for (int i = 0; i < 100; i++) {
 		atomic_fetch_add(&atomic_counter, 1);
-		printf("%d\n", atomic_load(&atomic_counter));
+		// printf("%d\n", atomic_load(&atomic_counter));  // 演示原子计数
 	}
 	atomic_fetch_sub(&t_count, 1);
 	return 0;
@@ -22,7 +22,6 @@ static void example_atomic_counter() {
 	puts("\n[Atomic counter in Concurrency]");
 	thrd_t t;
 #define T_MAXCOUNT 5
-
 	thrd_create(&t, [](void*)-> int {
 		thrd_t ts[T_MAXCOUNT]{ 0 };
 		for (int i = 0; i < T_MAXCOUNT; i++)
@@ -41,12 +40,12 @@ static int thread_lock_free(void* arg)
 {
 	static atomic_flag lockFree_flag = ATOMIC_FLAG_INIT;
 	const char* name = (const char*)arg;
-	struct timespec ts { .tv_nsec = 100000000 };
+	struct timespec ts { .tv_sec = 1};
 
 	// 循环检查是否有其他线程占用自旋锁，直至 flag 被清除
 	while (atomic_flag_test_and_set(&lockFree_flag)) {
 		printf("[%s] Waiting for lock...\n", name);
-		thrd_sleep(&ts, NULL); // 1s
+		thrd_sleep(&ts, NULL); 
 	}
 	printf("[%s] Lock acquired\n", name);
 
@@ -93,3 +92,19 @@ void test_stdatomic(void)
 	example_lock_free();
 	example_compare_exchange();
 }
+/*
+[Atomic counter in Concurrency]
+Atomic counter: 500 (expected 500)
+
+[Atomic flag in Concurrency]
+[ThreadB] Lock acquired
+[ThreadA] Waiting for lock...
+[ThreadA] Waiting for lock...
+[ThreadB] Lock released
+[ThreadA] Lock acquired
+[ThreadA] Lock released
+
+[Compare-and-Swap]
+CAS(10→20): success (val=20, expected=10)
+CAS(20→30): failed  (val=20, expected=20)
+*/

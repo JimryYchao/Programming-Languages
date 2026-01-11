@@ -6,13 +6,11 @@
 #include <threads.h>
 #include <windows.h>
 
-
 // 全局标志位
 static volatile sig_atomic_t keep_running = 1;
 
 // 演示基本信号处理
 static void handle_sigint(int sig)  // SIGINT 信号处理函数
-
 {
 	printf(">>> Received SIGINT (Ctrl+C) <<<\n");
 	keep_running = 0;
@@ -72,7 +70,6 @@ static void example_signal_blocking(void) {
 		printf("%d...\n", i);
 		Sleep(1000);
 	}
-
 	// 检查是否有被屏蔽的信号
 	if (WaitForSingleObject(g_signal_event, 0) == WAIT_OBJECT_0) {
 		printf("A signal was blocked during this time!\n");
@@ -81,7 +78,6 @@ static void example_signal_blocking(void) {
 	// 解除屏蔽
 	unblock_signals();
 	printf("Press Ctrl+C to exit the loop...\n");
-
 	signal(SIGINT, handle_sigint);
 	while (keep_running) {
 		Sleep(1000);  // Ctrl+C 退出
@@ -98,16 +94,12 @@ static void handle_sigsegv(int sig) // SIGSEGV 信号处理函数
 static void example_error_recovery(void)
 {
 	puts("\n[Segmentation Fault Handling]");
-
 	// 设置 SIGSEGV 处理器
 	signal(SIGSEGV, handle_sigsegv);
-
 	printf("Before invalid memory access\n");
-
 	// 故意制造段错误
 	int* ptr = NULL;
-	*ptr = 42;  // 这将触发 SIGSEGV
-
+	*ptr = 42;  // 这将触发 SIGSEGV, 并调用 handle_sigsegv()
 	printf("This line won't be executed\n");
 }
 
@@ -117,3 +109,32 @@ void test_signal(void)
 	example_signal_blocking();
 	example_error_recovery();
 }
+/*
+* [Basic Signal Handling]
+Try pressing Ctrl+C...
+Running... (threadID: 49852)
+Running... (threadID: 49852)
+>>> Received SIGINT (Ctrl+C) <<<
+Clean exit after signal
+
+[Signal Blocking]
+Press Ctrl+C to test...
+Signals blocked
+Signals are blocked for 5 seconds
+5...
+4...
+Ctrl+C received but blocked!
+3...
+2...
+1...
+A signal was blocked during this time!
+Signals unblocked
+Press Ctrl+C to exit the loop...
+Ctrl+C received and processed!
+>>> Received SIGINT (Ctrl+C) <<<
+Clean exit after signal
+
+[Segmentation Fault Handling]
+Before invalid memory access
+Caught segmentation fault! Signal: 11
+*/

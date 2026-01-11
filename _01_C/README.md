@@ -11,7 +11,6 @@ int main(void){
 
 - [C 规范摘要](./01_C%20规范摘要.md)
 - [C STD](./02_C%20STD.md)
-- [环境与编译](./03_C%20环境与编译.md)
 
 > **References**
 

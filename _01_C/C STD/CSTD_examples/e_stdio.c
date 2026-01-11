@@ -30,7 +30,7 @@ static void example_file_operations(void)
 		return;
 	}
 
-	char buf[128];
+	char buf[128] = {0};
 	while (1) {
 		if (fscanf_s(stdin, "%99[^#]", &buf, 128) == 1)  // 直至读取到 # 中止
 			fprintf_s(fp, buf);
@@ -41,11 +41,9 @@ static void example_file_operations(void)
 	// 读取文件
 	if (fopen_s(&fp, "test.txt", "r") == 0) {
 		puts("Read test.txt :");
-
 		int c;
 		while ((c = fgetc(fp))!= EOF)
 			putc(c, stdout);
-
 		if (ferror(fp)) {
 			puts("\n\nI/O error when reading");
 			exit(EXIT_FAILURE);
@@ -74,7 +72,6 @@ static void example_binary_io(void)
 		fwrite(&data, sizeof(data), 1, fp);  // 逐字节写入
 		fclose(fp);
 	}
-
 	// 二进制读取
 	if ((fp = fopen("data.bin", "rb"))) {
 		fread(&read_data, sizeof(read_data), 1, fp);  // 逐字节读取
@@ -82,7 +79,6 @@ static void example_binary_io(void)
 			read_data.id, read_data.value, read_data.tag);
 		fclose(fp);
 	}
-
 	remove("data.bin");
 }
 
@@ -93,17 +89,16 @@ static void example_stream_positioning(void)
 
 	FILE* fp = tmpfile();
 	if (!fp) return;
-
 	fprintf(fp, "1234567890");
 	rewind(fp);
 
 	// fgetpos/fsetpos
 	fpos_t pos;
 	fgetpos(fp, &pos);
-	fseek(fp, 3, SEEK_SET);
+	fseek(fp, 3, SEEK_SET);  // offset 3
 
 	char c = fgetc(fp);
-	printf("Character '%c' at position 3\n", c);
+	printf("Character '%c' at position 3\n", c); // first c is '4'
 
 	fsetpos(fp, &pos);
 	c = fgetc(fp);
@@ -119,3 +114,26 @@ void test_stdio(void)
 	example_binary_io();
 	example_stream_positioning();
 }
+/*
+[Formatted I/O]
+Output: 'Receive: Hello World' (20 characters needed)
+
+[File Operations]
+press '#' to exit...
+123
+456
+789#
+Read test.txt :
+123
+456
+789
+
+End of file is reached successfully
+
+[Binary I/O]
+Read binary: 123, 4.56, XYZ
+
+[Stream Positioning]
+Character '4' at position 3
+After reset: '1'
+*/

@@ -48,3 +48,10 @@ void test_errno(void)
 	example_errors();
 	example_thread_errors();
 }
+/*
+ERRNO[2]: No such file or directory
+ERRNO[33]: Domain error
+ERRNO[12]: Not enough space
+Thread ERRNO[11]: Resource temporarily unavailable
+Main ERRNO[0]: No error
+*/

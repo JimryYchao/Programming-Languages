@@ -15,8 +15,8 @@ static int thread_mtx(void* arg)  // 互斥锁保护操作
 	const char* name = (const char*)arg;
 	struct timespec ts;
 
-	for (int i = 0; i < 10; i++) {
-		timespec_get(&ts, TIME_UTC);
+	for (int i = 0; i < 3; i++) {
+		(void)timespec_get(&ts, TIME_UTC);
 		ts.tv_nsec += 150 * 1000 * 1000;
 		if (mtx_timedlock(&mutex, &ts) == thrd_success) {
 			int val = ++counter;
@@ -35,7 +35,6 @@ static void example_mutex_protection(void)
 	counter = 0; // 重置计数器
 	mtx_init(&mutex, mtx_timed);
 	thrd_t thr1, thr2;
-
 	// 创建线程（立即执行）
 	thrd_create(&thr1, thread_mtx, "Thread1");
 	thrd_create(&thr2, thread_mtx, "Thread2");
@@ -63,14 +62,11 @@ static int thread_lc1(void* arg)  // 设置线程局部数据
 	if (!data)
 		thrd_exit(0);
 	strncpy(data, (const char*)arg, len + 1);
-
 	// 设置 TSS 值
 	tss_set(tss_key, data);
 	printf("[Thread:%u] Set TSS: %s (%p)\n", tls_id, data, (void*)data);
-
 	// 模拟工作
 	thrd_sleep(&(struct timespec) { .tv_sec = 1 }, NULL);
-
 	// 获取并验证数据
 	char* retrieved = tss_get(tss_key);
 	printf("[Thread:%u] Retrieved: %s (%p)\n", tls_id, retrieved, (void*)retrieved);
@@ -81,6 +77,8 @@ static int thread_lc2(void* arg)
 	tls_id = thrd_current()._Tid;
 	// 模拟分配线程局部数据
 	int* data = malloc(sizeof(int));
+	if (!data)
+		thrd_exit(0);
 	*data = strlen((const char*)arg);
 
 	tss_set(tss_key, data);
@@ -99,7 +97,6 @@ static void example_local_storage(void)
 		perror("tss_create failed");
 		exit(EXIT_FAILURE);
 	}
-
 	// 创建线程并等待
 	thrd_t thr1, thr2;
 	thrd_create(&thr1, thread_lc1, "Hello");
@@ -122,23 +119,21 @@ static volatile int current_consumer_count = 0;
 static int producer(void* arg)      // 生产者线程函数
 {
 	SharedData* sd = (SharedData*)arg;
-	mtx_lock(&sd->mutex);
-
-	// 生产数据
-	sd->data = 10086;
-	sd->ready = true;
-	thrd_sleep(&(struct timespec) { .tv_sec = 2 }, NULL);
-	printf("[Producer] Data ready: %d\n", sd->data);
-
-	// 通知一个消费者
-	cnd_signal(&sd->cond);
-	// cnd_broadcast(&sd->cond);    // 或者通知所有消费者: 
-	mtx_unlock(&sd->mutex);
-
+	{
+		mtx_lock(&sd->mutex);
+		// 生产数据
+		sd->data = 10086;
+		sd->ready = true;
+		thrd_sleep(&(struct timespec) { .tv_sec = 2 }, NULL);
+		printf("[Producer] Data ready: %d\n", sd->data);
+		// 通知一个消费者
+		cnd_signal(&sd->cond);
+		// cnd_broadcast(&sd->cond);    // 或者通知所有消费者: 
+		mtx_unlock(&sd->mutex);
+	}
 	while (current_consumer_count > 0) {
 		thrd_sleep(&(struct timespec) { .tv_sec = 1 }, NULL);
 	}
-
 	return 0;
 }
 static int consumer(void* arg)      // 消费者线程函数
@@ -148,29 +143,29 @@ static int consumer(void* arg)      // 消费者线程函数
 	mtx_unlock(&mutex);
 
 	SharedData* sd = (SharedData*)arg;
+	{
+		mtx_lock(&sd->mutex);
+		struct timespec ts;
+		(void)timespec_get(&ts, TIME_UTC);
+		ts.tv_sec += 4;
+		// 等待条件满足
+		printf("[Consumer:%d] Waiting for data...\n", thrd_current()._Tid);
+		while (!sd->ready) {
+			if (cnd_timedwait(&sd->cond, &sd->mutex, &ts) == thrd_timedout) {
+				printf("[Consumer:%d] Waiting timeout\n", thrd_current()._Tid);
+				mtx_unlock(&sd->mutex);
 
-	mtx_lock(&sd->mutex);
-	struct timespec ts;
-	(void)timespec_get(&ts, TIME_UTC);
-	ts.tv_sec += 4;
-
-	// 等待条件满足
-	printf("[Consumer:%d] Waiting for data...\n", thrd_current()._Tid);
-	while (!sd->ready) {
-		if (cnd_timedwait(&sd->cond, &sd->mutex, &ts) == thrd_timedout) {
-			printf("[Consumer:%d] Waiting timeout\n", thrd_current()._Tid);
-			mtx_unlock(&sd->mutex);
-
-			mtx_lock(&mutex);
-			current_consumer_count--;
-			mtx_unlock(&mutex);
-			thrd_exit(EXIT_FAILURE);
+				mtx_lock(&mutex);
+				current_consumer_count--;
+				mtx_unlock(&mutex);
+				thrd_exit(EXIT_FAILURE);
+			}
 		}
+		// 消费数据
+		printf("[Consumer:%d] Consumed: %d\n", thrd_current()._Tid, sd->data);
+		sd->ready = false;
+		mtx_unlock(&sd->mutex);
 	}
-	// 消费数据
-	printf("[Consumer:%d] Consumed: %d\n", thrd_current()._Tid, sd->data);
-	sd->ready = false;
-	mtx_unlock(&sd->mutex);
 
 	mtx_lock(&mutex);
 	current_consumer_count--;
@@ -213,10 +208,9 @@ static int thread_worker(void* arg) {
 
 	mtx_lock(m);
 	// 等待条件
-	while (*cnt < 5) {
+	while (*cnt < 5) 
 		cnd_wait(c, m);
-	}
-	printf("[Worker] Woken up! Count: %d\n", *cnt);
+	printf("[Worker:%d] Woken up!\n", thrd_current()._Tid);
 	mtx_unlock(m);
 	return 0;
 }
@@ -226,27 +220,23 @@ static void example_broadcast(void)
 	mtx_t mtx;
 	cnd_t cond;
 	volatile int count = 0;
-
 	mtx_init(&mtx, mtx_plain);
 	cnd_init(&cond);
 
 	// 创建多个工作线程
 	Mct arg = { &mtx, &cond, &count };
 	thrd_t workers[3];
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) 
 		thrd_create(&workers[i], thread_worker, &arg);
-	}
 	// 主线程改变条件
 	mtx_lock(&mtx);
 	count = 5;
 	puts("[Main] Broadcasting wakeup...");
 	cnd_broadcast(&cond);
 	mtx_unlock(&mtx);
-
 	// 等待工作线程
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) 
 		thrd_join(workers[i], NULL);
-	}
 
 	mtx_destroy(&mtx);
 	cnd_destroy(&cond);
@@ -258,4 +248,35 @@ void test_threads(void)
 	example_producer_consumer();
 	example_broadcast();
 }
+/*
+[Mutex Protection]
+[Thread1] mutex counter: 1
+[Thread2] mutex counter: 2
+[Thread2] mutex counter: 3
+[Thread1] mutex counter: 4
+[Thread2] mutex counter: 5
+[Thread1] mutex counter: 6
+Final counter value: 6
 
+[Thread Local Storage]
+[Thread:50020] Set TSS: 5 (00000255F8C58A30)
+[Thread:52660] Set TSS: Hello (00000255F8C6BB10)
+[Thread:50020] Retrieved: 5 (00000255F8C58A30)
+Cleaning up: 00000255F8C58A30
+[Thread:52660] Retrieved: Hello (00000255F8C6BB10)
+Cleaning up: 00000255F8C6BB10
+[Main:19596] TSS value: 0000000000000000
+
+[Producer-Consumer Example]
+[Consumer:42256] Waiting for data...
+[Producer] Data ready: 10086
+[Consumer:42256] Consumed: 10086
+[Consumer:2196] Waiting for data...
+[Consumer:2196] Waiting timeout
+
+[Broadcast Wakeup Example]
+[Main] Broadcasting wakeup...
+[Worker:43272] Woken up!
+[Worker:21408] Woken up!
+[Worker:34956] Woken up!
+*/

@@ -65,3 +65,23 @@ void test_uchar(void)
 	example_utf32_conversion();
 	example_unicode_properties();
 }
+/*
+[UTF-8 <-> UTF-32 Conversion]
+UTF-8: 🌍地球
+UTF-32: U+1F30D U+5730 U+7403
+Converted UTF-8: 🌍地球
+
+[Unicode Properties]
+[U+0041] A properties:
+  Is wide? true
+  UTF-8 length: 1
+[U+4F60] 你 properties:
+  Is wide? false
+  UTF-8 length: 3
+[U+1F60A] 😊 properties:
+  Is wide? false
+  UTF-8 length: 4
+[U+1D11E] 𝄞 properties:
+  Is wide? false
+  UTF-8 length: 4
+*/

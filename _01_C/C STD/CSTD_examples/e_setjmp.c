@@ -11,14 +11,11 @@ static jmp_buf jump_buffer;
 static void nested_function(int depth, int maxDepth)
 {
 	printf("Entering nested function, depth: %d\n", depth);
-
 	if (depth > maxDepth) {  // 达成跳出条件
 		printf("longJmp condition triggered at depth %d\n", depth);
 		longjmp(jump_buffer, depth);  // 跳回 setjmp 位置
 	}
-
 	nested_function(depth + 1, maxDepth);
-
 	printf("This line won't be executed\n");  // 演示控制流中断
 }
 static void example_jump_nested_function(int maxDepth)
@@ -32,7 +29,7 @@ static void example_jump_nested_function(int maxDepth)
 		jp_state = setjmp(jump_buffer);
 		if (jp_state == 0) {
 
-			printf("\nAttempt %d: Calling nested functions\n", ++retry_count);
+			printf("Attempt %d: Calling nested functions\n", ++retry_count);
 			nested_function(1, maxDepth);
 			should_retry = 0;  // 正常完成
 		}
@@ -62,11 +59,9 @@ void error_handle(int code, error_handler_t f) {
 #define  Error(code, format, ...) \
 fprintf(stderr, "ERROR[%d] : " format "\n", code,__VA_ARGS__); \
 longjmp(err_jmp, code)
-
 static void raise_error(int code) {
 	Error(code, "error testing in %s() at line %d", __func__, __LINE__);
 }
-
 
 void test_setjmp(void)
 {
@@ -79,3 +74,17 @@ void test_setjmp(void)
 		error_handle(code, NULL);
 	raise_error(10086);
 }
+/*
+[Jump out nested function Example]
+Attempt 1: Calling nested functions
+Entering nested function, depth: 1
+Entering nested function, depth: 2
+Entering nested function, depth: 3
+Entering nested function, depth: 4
+Entering nested function, depth: 5
+longJmp condition triggered at depth 5
+Recovered from depth 5
+
+[Error Handling Example]
+ERROR[10086] : error testing in raise_error() at line 63
+*/

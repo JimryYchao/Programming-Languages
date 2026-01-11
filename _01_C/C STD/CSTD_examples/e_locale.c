@@ -78,3 +78,48 @@ void test_locale(void)
 	example_currency_format();
 	example_time_format();
 }
+/*
+Current numeric locale: Chinese (Simplified)_China.utf8
+[C locale] Decimal point: '.'
+[French locale] Decimal point: ','
+
+Current monetary locale: Chinese (Simplified)_China.utf8
+Currency symbols:
+International: CNY
+Local: ¥
+Positive format: 4
+
+Current monetary locale: C
+Currency symbols:
+International:
+Local:
+Positive format: 127
+
+Current monetary locale: fr_FR.UTF-8
+Currency symbols:
+International: EUR
+Local: €
+Positive format: 1
+
+Current monetary locale: cu-RU.UTF8
+Currency symbols:
+International: RUB
+Local: ₽
+Positive format: 1
+
+Current monetary locale: en_us.UTF8
+Currency symbols:
+International: USD
+Local: $
+Positive format: 3
+
+Current monetary locale: ja_jp.utf8
+Currency symbols:
+International: JPY
+Local: ¥
+Positive format: 3
+
+English time format: Sunday 1/11/2026 3:52:10 PM
+Chinese time format: 星期日 2026/1/11 15:52:10
+Japanese time format: 日曜日 2026/01/11 15:52:10
+*/

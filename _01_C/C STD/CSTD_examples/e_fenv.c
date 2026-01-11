@@ -131,3 +131,36 @@ void test_fenv(void) {
 	example_fe_rounding();
 	example_fe_environment();
 }
+/*
+>>> Floating-Point Exception Testing
+1.0 / 0.0 = inf
+current floating-point exception raised:   FE_DIVBYZERO
+sqrt(-1.0) = -nan(ind)
+current floating-point exception raised:   FE_INVALID
+exp(1000.0) = inf
+current floating-point exception raised:   FE_OVERFLOW  FE_INEXACT
+exp(-1000.0) = 0.000000e+00
+current floating-point exception raised:   FE_UNDERFLOW  FE_INEXACT
+1.0 / 3.0 = 0.33333333333333331483
+current floating-point exception raised:   FE_INEXACT
+
+>>> Rounding Direction Testing
+FE_TONEAREST (Round to nearest)    : 3.33333333333333303727 → 3
+FE_DOWNWARD (Round toward -∞)    : 3.33333333333333303727 → 3
+FE_UPWARD (Round toward +∞)      : 3.33333333333333348137 → 4
+FE_TOWARDZERO (Round toward zero)  : 3.33333333333333303727 → 3
+
+>>> Environment Control
+current floating-point exception raised:   FE_DIVBYZERO  FE_INVALID
+current rounding direction:  FE_DOWNWARD
+current floating-point exception raised:   NONE
+current rounding direction:  FE_DOWNWARD
+current floating-point exception raised:   FE_OVERFLOW  FE_INEXACT
+current rounding direction:  FE_UPWARD
+current floating-point exception raised:   FE_DIVBYZERO  FE_INVALID  FE_OVERFLOW  FE_INEXACT
+current rounding direction:  FE_DOWNWARD
+current floating-point exception raised:   FE_INVALID
+current rounding direction:  FE_DOWNWARD
+current floating-point exception raised:   NONE
+current rounding direction:  FE_TONEAREST
+*/
