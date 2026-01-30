@@ -6,7 +6,7 @@
 | [complex.h](https://zh.cppreference.com/w/c/header/complex.html)         | 复数类型和运算支持。                                                                           |                                                |
 | [ctype.h](https://zh.cppreference.com/w/c/header/ctype.html)             | 字符处理，提供用于分类（`is*`）和映射字符（`to*`）的函数。                                     |
 | [errno.h](https://zh.cppreference.com/w/c/header/errno.html)             | 错误报告，定义错误条件宏。                                                                     | [[↗]](./C%20STD/CSTD_examples/e_errno.c)       |
-| *[fenv.h](https://zh.cppreference.com/w/c/header/fenv.html)               | 浮点环境，提供对线程局域浮点环境的访问和控制。                                                 | [[↗]](./C%20STD/CSTD_examples/e_fenv.c)        |
+| [fenv.h](https://zh.cppreference.com/w/c/header/fenv.html)               | 浮点环境，提供对线程局域浮点环境的访问和控制。                                                 | [[↗]](./C%20STD/CSTD_examples/e_fenv.c)        |
 | [float.h](https://zh.cppreference.com/w/c/header/float.html)             | 浮点类型标准，提供常规浮点类型和十进制浮点类型的限制。                                         |
 | [inttypes.h](https://zh.cppreference.com/w/c/header/inttypes.html)       | 整型格式转换，提供转换函数和格式化输入输出预定义宏。                                           | [[↗]](./C%20STD/CSTD_examples/e_inttype.c)     |
 | [iso646.h](https://zh.cppreference.com/w/c/header/iso646.html)           | 替用拼写。                                                                                     |                                                |
@@ -38,4 +38,4 @@
 - stdmchar C29 ??
 -->
 
----****
+---
