@@ -1,4 +1,4 @@
 #include <stdio.h>
-int main(void){
- 	printf("Hello C!");
+int main(void) {
+	printf("Hello C!");
 }
