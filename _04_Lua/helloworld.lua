@@ -1,1 +1,1 @@
-print "Hello World! Lua"
+print "Hello Lua!"
