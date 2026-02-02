@@ -1,7 +1,7 @@
 ### Lua Summary
 
 ```lua
-print("Hello Lua548!")
+print("Hello Lua5.5!")
 ```
 
 > **Contents**
@@ -13,6 +13,7 @@ print("Hello Lua548!")
 > **References**
 
 - [Lua reference manuals](https://www.lua.org/manual)
+- [Lua 5.5 中文手册](https://lua.ac.cn/manual/5.5/)
 - [Lua binaries files ](https://sourceforge.net/projects/luabinaries/files)
 
 ---
