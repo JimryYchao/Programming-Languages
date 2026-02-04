@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="../lua550dll/lua550dll.vcxproj" Id="2fb7f645-8088-4814-95b7-1fcc1bda92d2" />
+  <Project Path="../lua550lib/lua550lib.vcxproj" Id="95c59452-37f1-42d2-82d5-4775de4e2c68" />
+  <Project Path="../LuacComplie/LuacComplie.vcxproj" Id="f68e26ad-e68e-4a08-8d89-fe7836ab95a6" />
+  <Project Path="LuaComplie.vcxproj" Id="4a2b9abd-f8a6-4a41-98f1-9399aeed3442" />
+</Solution>
