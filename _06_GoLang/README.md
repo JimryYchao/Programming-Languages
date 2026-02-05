@@ -1,5 +1,7 @@
 ## Go Summary
 
+<!-- go1.26.0 -->
+
 ```go
 package main
 import "fmt"
@@ -21,5 +23,6 @@ func main(){
 
  - [golang.google.cn/ref/spec](https://golang.google.cn/ref/spec)
  - [Go Standard Library](https://pkg.go.dev/std)
+ - [Go download](https://golang.google.cn/dl/)
 
 ---
