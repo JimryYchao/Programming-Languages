@@ -1,6 +1,6 @@
 ## Go Summary
 
-<!-- go1.26.0 -->
+<!-- go1.26.1 -->
 
 ```go
 package main
@@ -17,7 +17,7 @@ func main(){
 - [Go 内存模型](./03_Go%20内存模型.md)
 
 - [ ] Go 垃圾回收原理
-- [ ] Go 程序诊断与分析 
+- [ ] Go 程序诊断与分析
 
 > **References**
 

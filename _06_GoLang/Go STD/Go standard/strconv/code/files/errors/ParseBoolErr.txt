@@ -1,6 +1,0 @@
-invalid syntax : "tRue"
-invalid syntax : "trUE"
-invalid syntax : "TRuE"
-invalid syntax : "fAlse"
-invalid syntax : "FALse"
-invalid syntax : "fALsE"

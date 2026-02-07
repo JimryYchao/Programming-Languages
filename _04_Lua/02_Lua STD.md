@@ -1,11 +1,20 @@
-## Lua STD
+### Lua STD
 
-- version = 5.5
-- [examples](./Lua%20Libs/LuaSTD_examples/README.md)
+| STD                                                | Description          | Example |
+| :------------------------------------------------- | :------------------- | :------: |
+| [basic](https://www.lua.org/manual/5.5/manual.html#6.2)         | 基础库函数           | [[↗]](./Lua%20Libs/LuaSTD_examples/e_basic.lua)
+| [coroutine](https://www.lua.org/manual/5.5/manual.html#6.3) | 协程支持             | [[↗]](./Lua%20Libs/LuaSTD_examples/e_coroutine.lua)
+| [package](https://www.lua.org/manual/5.5/manual.html#6.4)         | 模块加载支持         | [[↗]](./Lua%20Libs/LuaSTD_examples/e_package.lua)
+| [string](https://www.lua.org/manual/5.5/manual.html#6.5)          | 字符串工具与模式匹配 | [[↗]](./Lua%20Libs/LuaSTD_examples/e_string.lua)
+| [utf8](https://www.lua.org/manual/5.5/manual.html#6.6)           | UTF-8 编码支持       | [[↗]](./Lua%20Libs/LuaSTD_examples/e_utf8.lua)
+| [table](https://www.lua.org/manual/5.5/manual.html#6.7)          | *table* 操作支持     | [[↗]](./Lua%20Libs/LuaSTD_examples/e_table.lua)
+| [math](https://www.lua.org/manual/5.5/manual.html#6.8)            | 数学库               | [[↗]](./Lua%20Libs/LuaSTD_examples/e_math.lua)
+| [io](https://www.lua.org/manual/5.5/manual.html#6.9)               | 输入与输出           | [[↗]](./Lua%20Libs/LuaSTD_examples/e_io.lua)
+| [os](https://www.lua.org/manual/5.5/manual.html#6.10)               | 系统支持             | [[↗]](./Lua%20Libs/LuaSTD_examples/e_os.lua)
+| [debug](https://www.lua.org/manual/5.5/manual.html#6.11)         | 调试支持             | [[↗]](./Lua%20Libs/LuaSTD_examples/e_debug.lua)
 
 >---
-
-### 1. 基础库 (base)
+#### 1. 基础库 (base)
 
 ```lua
 _G                            -- 全局环境表
@@ -37,7 +46,7 @@ xpcall(f, msgh [, arg1, ...]) -- 保护调用函数并捕获错误
 
 >---
 
-### 2. 协程库 (coroutine)
+#### 2. 协程库 (coroutine)
 
 ```lua
 coroutine.close(co)            -- 关闭协程
@@ -52,7 +61,7 @@ coroutine.yield(...)           -- 挂起协程的执行
 
 >---
 
-### 3. 包库 (package)
+#### 3. 包库 (package)
 
 ```lua
 package.config                -- 包配置字符串
@@ -67,7 +76,7 @@ package.searchpath(name, path [, sep [, rep]]) -- 搜索路径
 
 >---
 
-### 4. 字符串库 (string)
+#### 4. 字符串库 (string)
 
 ```lua
 string.byte(s [, i [, j]])    -- 返回字符串中字符的 ASCII 值
@@ -90,7 +99,7 @@ string.upper(s)               -- 转换为大写
 ```
 
 >---
-### 5. UTF-8 库 (utf8)
+#### 5. UTF-8 库 (utf8)
 
 ```lua
 utf8.char(...)                -- 将码点转换为 UTF-8 字符串
@@ -103,7 +112,7 @@ utf8.offset(s, n [, i])       -- 查找第 n 个字符的位置
 
 >---
 
-### 6. 表库 (table)
+#### 6. 表库 (table)
 
 ```lua
 table.concat(list [, sep [, i [, j]]]) -- 连接表中的字符串
@@ -118,7 +127,7 @@ table.unpack(list [, i [, j]])   -- 解包表为参数
 
 >---
 
-### 7. 数学库 (math)
+#### 7. 数学库 (math)
 
 ```lua
 math.abs(x)                   -- 绝对值
@@ -156,7 +165,7 @@ math.ult(m, n)                -- 无符号整数比较
 
 >---
 
-### 8. IO 库 (io)
+#### 8. IO 库 (io)
 
 ```lua
 io.stderr                     -- 标准错误文件句柄
@@ -184,7 +193,7 @@ file:write(...)               -- 写入文件
 
 >---
 
-### 9. 日期时间库 (os)
+#### 9. 日期时间库 (os)
 
 ```lua
 os.clock()                    -- 程序运行时间
@@ -202,7 +211,7 @@ os.tmpname()                  -- 生成临时文件名
 
 >---
 
-### 10. 调试库 (debug)
+#### 10. 调试库 (debug)
 
 ```lua
 debug.debug()                 -- 进入交互调试模式

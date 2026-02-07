@@ -1,5 +1,0 @@
-package gostd
-
-/*
-TODO
-*/
