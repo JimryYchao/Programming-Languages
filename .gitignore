@@ -12,6 +12,7 @@ test
 *.exe
 
 *.tar
+*.zip
 *.xz
 *.tar.xz
 
