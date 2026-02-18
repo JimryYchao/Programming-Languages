@@ -2,11 +2,11 @@
 
 ```c
 #include <stdio.h>
-int main(void){
-	printf("Hello C23!");
-	return 0;
+void main(void){
+	printf("Hello C!");
 }
 ```
+
 > **Contents**
 
 - [C 规范摘要](./01_C%20规范摘要.md)
@@ -17,5 +17,6 @@ int main(void){
 - [CPP reference](https://zh.cppreference.com/)
 - [Runebook.dev](https://runebook.dev/en/docs/c/-index-)
 - [ISO_IEC_9899_2024](./C%20STD/BS_ISO_IEC_9899_2024.pdf)
+
 
 ---
