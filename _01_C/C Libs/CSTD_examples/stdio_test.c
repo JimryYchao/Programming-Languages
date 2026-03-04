@@ -82,37 +82,11 @@ static void example_binary_io(void)
 	remove("data.bin");
 }
 
-// 演示流定位
-static void example_stream_positioning(void)
-{
-	puts("\n[Stream Positioning]");
-
-	FILE* fp = tmpfile();
-	if (!fp) return;
-	fprintf(fp, "1234567890");
-	rewind(fp);
-
-	// fgetpos/fsetpos
-	fpos_t pos;
-	fgetpos(fp, &pos);
-	fseek(fp, 3, SEEK_SET);  // offset 3
-
-	char c = fgetc(fp);
-	printf("Character '%c' at position 3\n", c); // first c is '4'
-
-	fsetpos(fp, &pos);
-	c = fgetc(fp);
-	printf("After reset: '%c'\n", c);
-
-	fclose(fp);
-}
-
 void test_stdio(void)
 {
 	example_formatted_io("Hello World");
 	example_file_operations();
 	example_binary_io();
-	example_stream_positioning();
 }
 /*
 [Formatted I/O]
@@ -132,8 +106,4 @@ End of file is reached successfully
 
 [Binary I/O]
 Read binary: 123, 4.56, XYZ
-
-[Stream Positioning]
-Character '4' at position 3
-After reset: '1'
 */

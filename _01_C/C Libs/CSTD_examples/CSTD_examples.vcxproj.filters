@@ -15,13 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="e_errno.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_fenv.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_inttype.c">
+    <ClCompile Include="fenv_test.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="e_locale.c">
@@ -58,6 +52,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="e_stdatomic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="errno_test.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

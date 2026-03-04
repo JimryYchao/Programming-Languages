@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -143,20 +143,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="e_errno.c" />
-    <ClCompile Include="e_fenv.c" />
-    <ClCompile Include="e_inttype.c" />
-    <ClCompile Include="e_locale.c" />
-    <ClCompile Include="e_setjmp.c" />
-    <ClCompile Include="e_signal.c" />
-    <ClCompile Include="e_stdalign.c" />
-    <ClCompile Include="e_stdatomic.cpp" />
-    <ClCompile Include="e_stdio.c" />
-    <ClCompile Include="e_stdlib.c" />
-    <ClCompile Include="e_string.c" />
-    <ClCompile Include="e_threads.c" />
-    <ClCompile Include="e_time.c" />
-    <ClCompile Include="e_uchar.c" />
+    <ClCompile Include="errno_test.c" />
+    <ClCompile Include="fenv_test.c" />
+    <ClCompile Include="locale_test.c" />
+    <ClCompile Include="setjmp_test.c" />
+    <ClCompile Include="signal_test.c" />
+    <ClCompile Include="stdatomic_test.cpp" />
+    <ClCompile Include="stdio_test.c" />
+    <ClCompile Include="stdlib_test.c" />
+    <ClCompile Include="string_test.c" />
+    <ClCompile Include="threads_test.c" />
+    <ClCompile Include="time_test.c" />
+    <ClCompile Include="uchar_test.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

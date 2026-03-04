@@ -8,8 +8,6 @@ extern "C" {
 
 	void test_fenv(void);
 
-	void test_inttype(void);
-
 	void test_locale(void);
 
 	void test_setjmp(void);

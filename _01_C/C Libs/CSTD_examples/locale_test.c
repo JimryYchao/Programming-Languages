@@ -11,8 +11,8 @@ static void example_numeric_format(void)
 {
 	// 获取当前区域设置
 	char old_lc[128] = { 0 };
-	strcpy(old_lc, setlocale(LC_NUMERIC, NULL));
-	char* old_locale = setlocale(LC_NUMERIC, NULL);
+	strcpy_s(old_lc, sizeof(old_lc), setlocale(LC_NUMERIC, NULL));
+	char* old = setlocale(LC_NUMERIC, NULL);
 	printf("Current numeric locale: %s\n", old_lc);
 
 	// 测试不同区域的数字格式
@@ -23,31 +23,6 @@ static void example_numeric_format(void)
 
 	// 恢复原始设置
 	setlocale(LC_NUMERIC, old_lc);
-}
-
-// 演示货币格式的区域化特性
-static void example_currency_format(void)
-{
-	char old_lc[128] = { 0 };
-	strcpy(old_lc, setlocale(LC_MONETARY, NULL));
-	struct lconv* lc = NULL; 
-
-#define currency(loc)   \
-	setlocale(LC_MONETARY, (loc));	\
-	lc = localeconv();				\
-	printf("\nCurrent monetary locale: %s\n", setlocale(LC_MONETARY, NULL));\
-	printf("Currency symbols:\n");\
-	printf("International: %s\n", lc->int_curr_symbol);\
-	printf("Local: %s\n", lc->currency_symbol);\
-	printf("Positive format: %d\n", lc->p_sign_posn);
-
-	currency(old_lc);
-	currency("C");
-	currency("fr_FR.UTF-8");
-	currency("cu-RU.UTF8");
-	currency("en_us.UTF8");
-	currency("ja_jp.utf8");
-	setlocale(LC_MONETARY, old_lc);
 }
 
 // 演示时间格式的区域化展示
@@ -72,52 +47,15 @@ static void example_time_format(void)
 
 void test_locale(void)
 {
-	setlocale(LC_ALL, "");  // 初始化为本地区域设置
-
+	// 初始化为本地区域设置
+	setlocale(LC_ALL, "");  // "C" 为默认行为
 	example_numeric_format();
-	example_currency_format();
 	example_time_format();
 }
 /*
 Current numeric locale: Chinese (Simplified)_China.utf8
 [C locale] Decimal point: '.'
 [French locale] Decimal point: ','
-
-Current monetary locale: Chinese (Simplified)_China.utf8
-Currency symbols:
-International: CNY
-Local: ¥
-Positive format: 4
-
-Current monetary locale: C
-Currency symbols:
-International:
-Local:
-Positive format: 127
-
-Current monetary locale: fr_FR.UTF-8
-Currency symbols:
-International: EUR
-Local: €
-Positive format: 1
-
-Current monetary locale: cu-RU.UTF8
-Currency symbols:
-International: RUB
-Local: ₽
-Positive format: 1
-
-Current monetary locale: en_us.UTF8
-Currency symbols:
-International: USD
-Local: $
-Positive format: 3
-
-Current monetary locale: ja_jp.utf8
-Currency symbols:
-International: JPY
-Local: ¥
-Positive format: 3
 
 English time format: Sunday 1/11/2026 3:52:10 PM
 Chinese time format: 星期日 2026/1/11 15:52:10

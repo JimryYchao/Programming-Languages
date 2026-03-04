@@ -17,8 +17,6 @@ int main()
 
 	//T(test_fenv);
 
-	//T(test_inttype);
-
 	//T(test_locale);
 
 	//T(test_setjmp);
