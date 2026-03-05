@@ -18,8 +18,8 @@ class Hello{
 
 > **Program Designs**
 
-- [利用 `using` 实现 Go Defer](./CSharp%20Programme%20Design/defer.cs)。
-- [基于异步实现 Go Channel](./CSharp%20Programme%20Design/channel.cs)
+- [利用 `using` 实现 Go Defer](./CSharp%20Programme%20Design/Defer/defer.cs)。
+- [基于异步实现 Go Channel](./CSharp%20Programme%20Design/Channel/channel.cs)
 
 > **References**
 
