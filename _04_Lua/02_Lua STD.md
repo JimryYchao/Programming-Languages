@@ -1,5 +1,7 @@
 ### Lua STD
 
+---
+
 | STD                                                | Description          | Example |
 | :------------------------------------------------- | :------------------- | :------: |
 | [basic](https://www.lua.org/manual/5.5/manual.html#6.2)         | 基础库函数           | [[↗]](./Lua%20Libs/LuaSTD_examples/e_basic.lua)

@@ -1,5 +1,7 @@
 ## Lua 规范摘要
 
+---
+
 ### 1. 基本概念
 
 #### 1.1. 类型系统
@@ -108,19 +110,19 @@ assert(loadfile("name.lc"))()
 
 > **标准关键字**
 
-| description        | keywords                                             |
-| :----------------- | :--------------------------------------------------- |
-| 逻辑运算           | `and`,`or`,`not`                                     |
-| 全局或局部变量声明 | `global`,`local`                                     |
-| 局部变量常量限定   | `<const>`                                            |
-| 局部变量关闭限定   | `<close>`                                            |
-| 表函数自引用       | `self`                                               |
-| 空值               | `nil`                                                |
-| 布尔值             | `true`,`false`                                       |
-| 函数声明           | `function-end`                                       |
-| 跳转语句           | `break`,`goto`,`return`                              |
-| 迭代语句           | `while-do`,`repeat-until`,`for-do`,`for-in-do`,`end` |
-| 条件语句           | `if-then`,`else`,`elseif-then`,`end`                 |
+| description      | keywords                                             |
+| :--------------- | :--------------------------------------------------- |
+| 逻辑运算         | `and`,`or`,`not`                                     |
+| 范围声明       | `global`,`local`                                     |
+| 局部变量常量限定 | `<const>`                                            |
+| 局部变量关闭限定 | `<close>`                                            |
+| 表函数自引用     | `self`                                               |
+| 空值             | `nil`                                                |
+| 布尔值           | `true`,`false`                                       |
+| 函数声明         | `function-end`                                       |
+| 跳转语句         | `break`,`goto`,`return`                              |
+| 迭代语句         | `while-do`,`repeat-until`,`for-do`,`for-in-do`,`end` |
+| 条件语句         | `if-then`,`else`,`elseif-then`,`end`                 |
 
 > **运算符**
 
@@ -135,7 +137,7 @@ assert(loadfile("name.lc"))()
 ---
 ### 2. 类型和声明
 
-Lua 中有 8 个基本类型：*nil*（空）、*boolean*（布尔）、*number*（数值）、*string*（字符串）、*userdata*（用户数据）、*function*（函数）、*thread*（线程） 和 *table*（表）。`local` 声明局部变量。`_` 表示弃元。
+Lua 中有 8 个基本类型：*nil*（空）、*boolean*（布尔）、*number*（数值）、*string*（字符串）、*userdata*（用户数据）、*function*（函数）、*thread*（线程） 和 *table*（表）。`_` 声明弃元。
 
 未初始化变量值为 `nil`，`nil` 可用于将变量或表键值置空，Lua 自动垃圾回收。真值相同的整数和浮点数被视为相等，`math.type(n)` 返回数值底层类型；浮点数支持 E 和 P 计数法。    
 
@@ -144,15 +146,14 @@ Lua 中有 8 个基本类型：*nil*（空）、*boolean*（布尔）、*number*
 type(nil)       --> nil
 type(true)      --> boolean
 type(1234)      --> number
+math.type(3)    --> integer
+math.type(3.14) --> float
 type("Hello")   --> string
 type(io.stdin)  --> userdata
 type(print)     --> function
 type({})        --> table
-type(type(X))   --> string
-math.type(3)    --> integer
-math.type(3.14) --> float
-type(coroutine.create(type))   --> thread
-type(coroutine.wrap(type))     --> function
+type(coroutine.create(f))   --> thread
+type(coroutine.wrap(f))     --> function
 ```
 
 > *浮点型与整型之间的转换*
@@ -172,7 +173,7 @@ type(coroutine.wrap(type))     --> function
 >---
 #### 2.1. string
 
-Lua 字符串包括转义字符串 `"string"` 或 `'string'` 和原始字符串 `[=[string]=]`。`#str` 返回字符串长度，`x .. y` 拼接字符串，操作数可以是字符串或数值。
+字符串包括转义字符串 `"string"` 或 `'string'` 和原始字符串 `[=[string]=]`。`#str` 返回字符串长度；`x .. y` 拼接字符串，操作数可以是字符串或数值。
 
 ```lua
 a = "a 'line\n'"
@@ -187,21 +188,12 @@ second line
 > *转义字符*
 
 ```lua
-\a           --> 响铃
-\b           --> 退格
-\f           --> 换页
-\n           --> 换行
-\r           --> 回车
-\t           --> 水平制表符
-\v           --> 垂直制表符
-\\           --> 反斜杠
-\'           --> 单引号
-\"           --> 双引号
-\0           --> 空字符
 \ddd         --> \000 ~ \255
 \xhh         --> \x00 ~ \xff
 \u{h…h}      --> 0 ~ 7fffffff
 \[ \]        --> [ ]
+\a, \b, \f, \n, \r, \t, \v 
+\\, \', \", \z
 ```
 
 `\z`：忽略任意空白字符直到第一个非空白字符。
@@ -223,18 +215,16 @@ t1 = {
     K1 = "V1", ["K2"] = "V2",
     [1] = 1, [2] = 2, 3, 4, 5
 }
-
-a = {}			
-a["K1"] = "V1"	
-a.K2 = 999	
-a[1] = "Great"	
-a.__index = a	
+a = {}
+a["K1"] = "V1"
+a.K2 = 999
+a[1] = "Great"
+a.__index = a
 ```
 
-列表的声明，索引从 1 开始。索引可以显式指定，计算列表边界时会忽略小于 1 的索引。列表出现连续 `nil` 值时，`#table` 返回连续空洞前的索引。 
+列表索引从 1 开始，可以显式指定，计算列表长度时会忽略小于 1 的索引。列表出现连续 `nil` 值时，`#table` 返回连续空洞前的索引。
 
 ```lua
--- 索引从 1 开始为每个列表元素建立索引关联
 day = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
 -- 显式索引
 arr = {[1]=1,[2]=2,[4]=4,[5]=5,[7]=7,[9]=9}  -- #arr = 5
@@ -255,7 +245,9 @@ function Func( Params )
     body 
     [return r1,r2, ...]  -- 多值返回
 end
-Func = function( Params) body end
+Func = function( Params ) 
+    body 
+end
 
 -- 闭包
 function counter()
@@ -313,7 +305,7 @@ Foo(1,2,3,4,5,6,7,8)	-- 1 3 5 7
 
 > *表函数*
 
-表函数通过两种方式调用：`t.fun()` 或 `t:fun()`。`t:fun` 将表自身作为第一个参数传入。`function T:Func(params)` 声明相当于 `function T.Func(self, params)`。
+表函数通过两种方式调用：`t.fun()` 或 `t:fun()`。`T:Func(params)` 相当于 `T.Func(self, params)`。
 
 ```lua
 t = {1,2,3,4,5,6}
@@ -328,7 +320,7 @@ t:Traverse()	-- or t.Traverse(t)
 >---
 #### 2.4. thread 与 coroutine
 
-协程（*coroutine*）与线程（*thread*）类似：协程拥有自己的栈、局部变量和指令指针，与其他协程共享了全局变量和其他几乎一切资源。
+协程（*coroutine*）与线程（*thread*）类似：协程拥有自己的栈、局部变量和指令指针。
 
 `coroutine.create(f)` 返回一个 *thread* 协程，*thread* 协程有四种状态：*suspended*、*running*、*normal*、*dead*。创建协程时，协程不会自动运行而处于挂起状态。
 
@@ -391,7 +383,7 @@ end
 >---
 #### 2.5. 全局遍历和局部变量 
 
-Lua 隐式启用 `global *` 全局模式，变量声明默认全局，`local` 声明局部变量。在某个范围内显式使用 `global` 则在当前范围内启用全局变量严格模式；`global *` 在当前范围内用于关闭全局变量严格模式。
+Lua 隐式启用 `global *` 全局模式，变量声明默认全局，`local` 声明局部变量。在某个范围内显式使用 `global` 则在当前范围内启用全局变量严格模式；`global *` 关闭全局变量严格模式。
 
 ```lua
 global hi, print
@@ -403,7 +395,7 @@ end
 print(hi)  -- World
 
 global *   -- 关闭全局严格模式
-t = table.create(5, 10)  -- 隐式全局，预分配表空间
+t = table.create(5, 10)  -- 隐式全局
 ```
 
 >---
@@ -474,7 +466,7 @@ end
 math.pi - math.pi % 0.0001	--> 3.1415
 ```
 
-> and & or
+> and, or
 
 `and` 与 `or` 支持短路原则。
 - `and` 在第一个操作数为 `false` 或 `nil` 时返回第一个操作数，否则返回第二个操作数；
@@ -496,7 +488,7 @@ X and Y or Z
 --> X == false --> Z
 ```
 
-> << & >>
+> <<, >>
 
 移位是逻辑移位，以 0 补齐空位
 
@@ -520,6 +512,7 @@ X and Y or Z
 ```
 
 ---
+
 ### 4. 语句
 
 #### 4.1. 代码块：do-end
@@ -533,12 +526,10 @@ end
 >---
 ####  4.2. 条件控制：if
 
-`false` 和 `nil` 值为假，`true` 和非 `nil` 值为真。
-
 ```lua
-if <cond> then
+if <cond> then      -- cond = false/nil == false
     <body>
-elseif <cond> then
+elseif <cond> then  -- cond = true/ none-nil == true
     <body>
 else
     <body>
@@ -548,11 +539,16 @@ end
 >---
 #### 4.3. 迭代语句：while, repeat, for
 
+> while-do
+
 ```lua
 while <cond> do
     <body>
 end
 ```
+
+> repeat-until
+
 ```lua
 repeat
     <body>
@@ -616,7 +612,7 @@ end
 
 ```lua
 arr = {1,3,4,5,a="A",b="B"}
-for k,v in pairs(arr) do   -- 遍历键值对 	
+for k,v in pairs(arr) do    -- 遍历键值对
     print(k,v)
 end
 ```
@@ -625,7 +621,7 @@ end
 
 ```lua
 arr = {1,3,4,5,a="A",b="B"}
-for i,v in ipairs(arr) do	-- 遍历列表
+for i,v in ipairs(arr) do   -- 遍历列表
     print(i,v)	-- 1,3,4,5
 end
 ```
@@ -634,8 +630,6 @@ end
 #### 4.4. 跳转语句：goto, break, return
 
 > `goto` 
-
-`goto` 跳转到目标标签。
 
 ```lua
 do 
@@ -649,8 +643,6 @@ end
 
 > `break`
 
-`break` 中断所属循环体的执行。
-
 ```lua
 while cond do
     -- code
@@ -662,18 +654,17 @@ end
 
 > `return` 
 
-`return` 终止函数执行并返回（多值）到调用方。文件范围 `return` 表示从模块返回值。 
-
 ```lua
 local M =  _ENV
 function Func()
     -- code
-    return ok, rt   -- 多值返回
+    return [ok, rt, ...]?   -- 多值返回
 end
 return M   -- 文件范围返回值
 ```
 
 ---
+
 ### 5. 元表与元方法
 
 元表定义了其原始值允许的某些操作，可以设置元表中特定元方法来更改值的行为。*table* 和 *full userdata* 具有单独的元表，除字符串外其他类型默认没有元表。
@@ -962,9 +953,9 @@ p.Func()
 
 ```lua
 local prototype = {}
+prototype.__index = prototype
 function prototype:new(o)
     o = o or {}
-    self.__index = self
     setmetatable(o, self)
     o.base = self   -- 关联超类
     return o
@@ -1109,7 +1100,7 @@ _G["atexit"] = t
 
 Lua 执行自动内存管理，`string`、`table`、`userdata`、`function`、`thread`、`internal struct` 等都是自动管理的对象。
 
-一直到 Lua5.0 使用的是 *标记清除式垃圾收集器*。这种垃圾收集器的特点是会时不时地停止主程序的运行来执行一次完整的垃圾收集周期：标记（mark）>> 清理（cleaning）>> 清除（sweep）>> -析构（finalization）。
+一直到 Lua5.0 使用的是 *标记清除式垃圾收集器*。这种垃圾收集器的特点是会时不时地停止主程序的运行来执行一次完整的垃圾收集周期：标记（mark）>> 清理（cleaning）>> 清除（sweep）>>  析构（finalization）。
   - 标记：把根节点集合（由 Lua 可以直接访问的对象组成）标记为活跃，这个集合只包括 C 注册表。保存在一个活跃对象中的对象是程序可达的，弱引用表中的元素不遵循这个规则。当所有可达对象被标记为活跃时，标记阶段完成。
   - 清理：Lua 主要处理析构器和弱引用表。首先 Lua 遍历所有被标记为需要进行析构但未被标记为活跃状态的对象重新标记为活跃（复苏），并被放在一个单独的列表中（析构阶段会用到）。然后 Lua 遍历弱引用表并从中移除键或值未被标记的元素。
   - 清除：遍历所有对象（Lua 会把所有创建的对象放在一个链表中），所有非活跃对象被回收，活跃对象被清理标记，进入下一个清除阶段。

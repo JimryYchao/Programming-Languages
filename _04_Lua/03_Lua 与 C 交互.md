@@ -1,5 +1,7 @@
 ## Lua 与 C 交互
 
+---
+
 ### 1. C API
 
 C API 用于读写 Lua 全局变量、调用 Lua 函数、运行 Lua 代码段、注册 C 函数等。Lua 标准库将所有状态保存在动态结构体 `lua_State`。
@@ -489,12 +491,12 @@ receive:        Mess_5
 >---
 #### 3.3. Examples
 
-- [C 调用 Lua](./Lua%20Libs/LuaWithC/code/C_Call_Lua.c)，[Lua source](./Lua%20Libs/LuaWithC/code/CCallLua.lua)
-- [lua 调用 C 函数](./Lua%20Libs/LuaWithC/code/Lua_Call_C.c)
-- [C 函数的协程调度模型](./Lua%20Libs/LuaWithC/code/Continue_CFunc.c)
-- [用户数据类型](./Lua%20Libs/LuaWithC/code/BitArray.c)，定义一个布尔数组（*BitArray*）。
-- [多线程并发 lproc 库设计](./Lua%20Libs/LuaWithC/code/concurrency.c)，[Lua source](./Lua%20Libs/LuaWithC/code/lproc.lua)
-- [状态机内存分配限制](./Lua%20Libs/LuaWithC/code/memlimit.c)，[Lua source](./Lua%20Libs/LuaWithC/code/memlimit.lua)
-- [C 库函数](./Lua%20Libs/CMudule/README.md)
+- [C 调用 Lua](./Lua%20Libs/examples/LuaWithC/code/C_Call_Lua.c)，[Lua source](./Lua%20Libs/examples/LuaWithC/code/CCallLua.lua)
+- [lua 调用 C 函数](./Lua%20Libs/examples/LuaWithC/code/Lua_Call_C.c)
+- [C 函数的协程调度模型](./Lua%20Libs/examples/LuaWithC/code/Continue_CFunc.c)
+- [用户数据类型](./Lua%20Libs/examples/LuaWithC/code/BitArray.c)，定义一个布尔数组（*BitArray*）。
+- [多线程并发 lproc 库设计](./Lua%20Libs/examples/LuaWithC/code/concurrency.c)，[Lua source](./Lua%20Libs/examples/LuaWithC/code/lproc.lua)
+- [状态机内存分配限制](./Lua%20Libs/examples/LuaWithC/code/memlimit.c)，[Lua source](./Lua%20Libs/examples/LuaWithC/code/memlimit.lua)
+- [C 库函数](./Lua%20Libs/examples/CMudule/README.md)
 
 ---
