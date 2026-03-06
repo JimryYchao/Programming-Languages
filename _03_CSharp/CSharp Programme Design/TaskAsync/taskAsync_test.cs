@@ -11,6 +11,6 @@ public class TaskAsyncTest {
             });
     }
     public static async Task Test() {
-        await Task.WhenAll(from task in Generator() select task);
+        await Task.WhenAll((from task in Generator() select task.Result).ToList());
     }
 }

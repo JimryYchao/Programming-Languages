@@ -1,5 +1,4 @@
-﻿
-//System.Console.WriteLine("Hello World!");
+﻿System.Console.WriteLine("Hello World!");
 
 // DeferTest.Test();
 
@@ -14,4 +13,3 @@
 // await TaskAsyncTest.Test();
 
 // dotnet run 
-
