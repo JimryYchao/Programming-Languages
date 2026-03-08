@@ -1,8 +1,8 @@
-## CSharp 异步
+## CSharp 异步与并行
 
 ---
 
-### APM 回调异步模式
+### 1. APM 回调异步模式
 
 APM 基于回调的异步模式，基于 `IAsyncResult` 接口和 `BeginXxx` / `EndXxx` 方法对。
 - `BeginXxx` 开始异步操作并返回实现 `IAsyncResult` 对象。
@@ -18,7 +18,7 @@ public interface IAsyncResult {
 ```
 
 >---
-#### APM 示例
+#### 1.1. APM 示例
 
 > 异步调用委托示例
 
@@ -135,7 +135,7 @@ class Program {
 ```
 
 ---
-### EAP 事件异步模式
+### 2. EAP 事件异步模式
 
 EAP 基于事件的异步模式。
 - `XxxAsync` 同于启动异步操作，可能包含同步版本的镜像。
@@ -182,7 +182,7 @@ public class AsyncExample {
 ```
 
 >---
-#### EAP 示例
+#### 2.1. EAP 示例
 
 ```csharp
 
@@ -337,7 +337,7 @@ class Program {
 ```
 
 ---
-### TAP 任务异步模式
+### 3. TAP 任务异步模式
 
 TAP 基于任务的异步模式，基于 `System.Threading.Tasks` 的 `Task` 和 `Task<TResult>`、`ValueTask` 和 `ValueTask<TResult>`。
 
@@ -478,7 +478,7 @@ internal struct MultiCallMethodAsyncStateMachine : IAsyncStateMachine
 ```
 
 >---
-#### TAP 示例
+#### 3.1. TAP 示例
 
 ```csharp
 // 一个简易的任务类
