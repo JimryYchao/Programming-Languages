@@ -14,7 +14,8 @@ class Hello{
 - [C# 规范摘要](./01_CSharp%20规范摘要.md)
 - [C# 安全转义规范](./02_CSharp%20安全转义规范.md)
 - [C# 线程管理](./03_CSharp%20线程管理.md)
-- [C# 异步编程](./04_CSharp%20异步.md)
+- [C# 异步编程模式](./04_CSharp%20异步编程模式.md)
+- [C# 并行编程](./05_CSharp%20并行编程.md)
 - [CLI 公共语言基础结构概述](<CLI 公共语言基础结构/00_CLI Directory.md>)
 
 
