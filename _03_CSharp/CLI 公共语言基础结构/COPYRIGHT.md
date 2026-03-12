@@ -37,7 +37,6 @@ Ecma 国际文件的官方版本是 Ecma 国际网站上的英文版本。翻译
 
 - [Ecma International](https://ecma-international.org/)
 - [ECMA-335:Common Language Infrastructure (CLI)](https://ecma-international.org/publications-and-standards/standards/ecma-335/) 6th edition, June 2012
-- [About Markdown English version of ECMA-335](https://github.com/stakx/ecma-335)
 - [Directory quick link](___CLI%20Directory.md)
 
 >---
