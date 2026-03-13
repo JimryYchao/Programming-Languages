@@ -14,7 +14,7 @@ void main(void){
 
 > **References**
 
-- [CPP reference](https://zh.cppreference.com/)
+- [C reference](https://zh.cppreference.com/c)
 - [Runebook.dev](https://runebook.dev/en/docs/c/-index-)
 - [ISO_IEC_9899_2024](.ref/BS_ISO_IEC_9899_2024.pdf)
 
