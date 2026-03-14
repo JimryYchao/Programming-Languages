@@ -90,22 +90,22 @@ static void example_bsearch(void)
 	puts("\n[Integer Array Search]");
 	int arr[] = { 10, 20, 30, 40, 50, 60 };
 	int count = sizeof(arr) / sizeof(int);
-	int key = 40;
-	void* result = bsearch(&key, arr, count, sizeof(int), compare_ints);
-	if (result)
-		printf("Found %d at index %lld\n", key, (int*)result - arr);
-	else printf("%d not found\n", key);
+	int k1 = 40;
+	void* r1 = bsearch(&k1, arr, count, sizeof(int), compare_ints);
+	if (r1)
+		printf("Found %d at index %lld\n", k1, (int*)r1- arr);
+	else printf("%d not found\n", k1);
 
 	// 字符串查找
 	puts("\n[String Array Search]");
 	const char* strs[] = { "apple", "banana", "grape", "orange", "pear" };
-	int count = sizeof(strs) / sizeof(strs[0]);
-	const char* key = "grape";
+	count = sizeof(strs) / sizeof(strs[0]);
+	const char* k2 = "grape";
 
 	// 按字典序查找
-	void* result = bsearch(&key, strs, count, sizeof(char*), strcmp);
-	if (result) printf("Found '%s' at index %lld\n", *(char**)result, (char**)result - strs);
-	else printf("'%s' not found\n", key);
+	void* r2 = bsearch(&k2, strs, count, sizeof(char*), strcmp);
+	if (r2) printf("Found '%s' at index %lld\n", *(char**)r2, (char**)r2 - strs);
+	else printf("'%s' not found\n", k2);
 }
 
 // 演示结构体查找

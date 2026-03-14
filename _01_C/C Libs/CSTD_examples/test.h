@@ -14,8 +14,6 @@ extern "C" {
 
 	void test_signal(void);
 
-	void test_stdalign(void);
-
 	void test_stdio(void);
 
 	void test_stdlib(void);

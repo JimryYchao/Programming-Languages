@@ -18,43 +18,40 @@
     <ClCompile Include="fenv_test.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="e_locale.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_setjmp.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_signal.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_stdalign.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_stdio.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_stdlib.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_threads.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_time.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_uchar.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_string.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="e_stdatomic.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="errno_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="locale_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="setjmp_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="signal_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdatomic_test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdio_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdlib_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="string_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="threads_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="time_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="uchar_test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="__main__.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

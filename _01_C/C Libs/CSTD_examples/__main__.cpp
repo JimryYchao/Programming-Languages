@@ -23,8 +23,6 @@ int main()
 
 	//T(test_signal);
 
-	//T(test_stdalign);
-
 	//T(test_stdatomic);
 
 	//T(test_stdio);
