@@ -89,7 +89,5 @@ int main(void) {
 	/*     language support      */
 	/*     language support      */
 	/*     language support      */
-
-	return 0;
 }
 
